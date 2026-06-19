@@ -1,0 +1,843 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Commander League — Game Tracker</title>
+<link rel="preconnect" href="https://fonts.googleapis.com/">
+<link rel="preconnect" href="https://fonts.gstatic.com/" crossorigin="">
+<link href="index_files/css2.css" rel="stylesheet">
+<style>
+:root{
+  --felt:#0d1410; --felt2:#121e18; --panel:#16241d; --panel2:#1b2c23;
+  --line:#2a4035; --line2:#37574a;
+  --ink:#eef3ef; --ink2:#b9c7bf; --ink3:#7d9286;
+  --gold:#d9b25a; --gold2:#f0cd7e;
+  --W:#f7f3e3; --U:#3a7bd5; --B:#7a5b8c; --R:#d6442f; --G:#3f9b54;
+  --win:#3f9b54; --lose:#d6442f; --mid:#d9b25a;
+  --radius:14px;
+  --shadow:0 8px 30px rgba(0,0,0,.45);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{
+  font-family:'Inter',system-ui,sans-serif;
+  background:
+    radial-gradient(1200px 600px at 80% -10%, #1a2c22 0%, transparent 60%),
+    radial-gradient(900px 500px at 10% 110%, #16241d 0%, transparent 55%),
+    var(--felt);
+  color:var(--ink); line-height:1.5; min-height:100vh;
+  -webkit-font-smoothing:antialiased;
+}
+.wrap{max-width:1180px;margin:0 auto;padding:0 22px}
+::selection{background:var(--gold);color:#1a1209}
+
+/* ---------- HERO ---------- */
+header{
+  position:relative; overflow:hidden;
+  border-bottom:1px solid var(--line);
+  background:linear-gradient(180deg,rgba(13,20,16,.2),rgba(13,20,16,.7));
+}
+.mana-ring{
+  position:absolute; top:-160px; right:-120px; width:520px; height:520px;
+  border-radius:50%; opacity:.16; pointer-events:none;
+  background:conic-gradient(var(--W) 0deg 72deg,var(--U) 72deg 144deg,var(--B) 144deg 216deg,var(--R) 216deg 288deg,var(--G) 288deg 360deg);
+  filter:blur(2px);
+  -webkit-mask:radial-gradient(circle,transparent 38%,#000 39%,#000 60%,transparent 61%);
+          mask:radial-gradient(circle,transparent 38%,#000 39%,#000 60%,transparent 61%);
+  animation:spin 80s linear infinite;
+}
+@keyframes spin{to{transform:rotate(360deg)}}
+.hero-inner{position:relative;padding:54px 0 46px;z-index:1}
+.eyebrow{
+  font-family:'JetBrains Mono',monospace; font-size:12px; letter-spacing:.28em;
+  text-transform:uppercase; color:var(--gold); margin-bottom:14px;
+  display:flex; align-items:center; gap:12px;
+}
+.eyebrow::before{content:"";width:34px;height:1px;background:var(--gold);display:inline-block}
+h1{
+  font-family:'Oswald',sans-serif; font-weight:600; font-size:clamp(40px,7vw,76px);
+  line-height:.96; letter-spacing:-.01em; text-transform:uppercase;
+}
+h1 .thin{font-weight:300;color:var(--ink2)}
+.sub{margin-top:16px;max-width:560px;color:var(--ink2);font-size:16px}
+.hero-stats{display:flex;flex-wrap:wrap;gap:34px;margin-top:34px}
+.hstat .n{font-family:'Oswald',sans-serif;font-weight:600;font-size:34px;line-height:1;color:var(--gold2)}
+.hstat .l{font-size:12px;color:var(--ink3);text-transform:uppercase;letter-spacing:.12em;margin-top:6px}
+
+/* ---------- NAV ---------- */
+nav{
+  position:sticky; top:0; z-index:50;
+  background:rgba(13,20,16,.82); backdrop-filter:blur(12px);
+  border-bottom:1px solid var(--line);
+}
+.nav-inner{display:flex;gap:6px;padding:10px 0;overflow-x:auto}
+.tab{
+  font-family:'Oswald',sans-serif; font-weight:500; font-size:15px;
+  text-transform:uppercase; letter-spacing:.04em;
+  color:var(--ink3); background:none; border:none; cursor:pointer;
+  padding:9px 16px; border-radius:8px; white-space:nowrap; transition:.18s;
+}
+.tab:hover{color:var(--ink);background:var(--panel)}
+.tab.active{color:#1a1209;background:var(--gold)}
+
+main{padding:40px 0 80px}
+.view{display:none;animation:fade .35s ease}
+.view.active{display:block}
+@keyframes fade{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+.section-head{display:flex;align-items:baseline;justify-content:space-between;gap:16px;margin-bottom:22px;flex-wrap:wrap}
+.section-head h2{font-family:'Oswald',sans-serif;font-weight:600;font-size:28px;text-transform:uppercase;letter-spacing:.01em}
+.section-head .hint{color:var(--ink3);font-size:13px}
+
+/* ---------- PODIUM ---------- */
+.podium{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:30px;align-items:end}
+.pod-card{
+  background:linear-gradient(180deg,var(--panel2),var(--panel));
+  border:1px solid var(--line); border-radius:var(--radius);
+  padding:22px 18px; text-align:center; position:relative; box-shadow:var(--shadow);
+}
+.pod-card.p1{border-color:var(--gold);transform:translateY(-14px)}
+.pod-card.p1::before{content:"";position:absolute;inset:0;border-radius:var(--radius);padding:1px;
+  background:linear-gradient(180deg,var(--gold2),transparent);
+  -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);
+  -webkit-mask-composite:xor;mask-composite:exclude;pointer-events:none}
+.medal{font-family:'Oswald';font-weight:700;font-size:13px;letter-spacing:.1em;color:var(--ink3);text-transform:uppercase}
+.pod-card.p1 .medal{color:var(--gold)}
+.pod-name{font-family:'Oswald';font-weight:600;font-size:26px;margin:8px 0 2px;text-transform:uppercase}
+.dial{margin:14px auto 10px;width:118px;height:118px;position:relative}
+.dial svg{transform:rotate(-90deg)}
+.dial .val{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.dial .val b{font-family:'Oswald';font-weight:600;font-size:30px;line-height:1;color:var(--ink)}
+.dial .val span{font-size:10px;color:var(--ink3);text-transform:uppercase;letter-spacing:.1em;margin-top:3px}
+.pod-meta{font-size:13px;color:var(--ink2);margin-top:4px}
+.pod-meta b{color:var(--ink)}
+
+/* ---------- TABLE ---------- */
+.panel{background:linear-gradient(180deg,var(--panel),var(--felt2));border:1px solid var(--line);border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow)}
+table{width:100%;border-collapse:collapse}
+th{
+  font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;
+  color:var(--ink3);text-align:right;padding:13px 14px;border-bottom:1px solid var(--line);font-weight:600;cursor:pointer;user-select:none;white-space:nowrap
+}
+th:first-child{text-align:left}
+th.sortable:hover{color:var(--gold)}
+th .arr{opacity:.5;font-size:9px}
+td{padding:13px 14px;text-align:right;border-bottom:1px solid rgba(42,64,53,.5);font-variant-numeric:tabular-nums;font-size:14px}
+td:first-child{text-align:left}
+tr:last-child td{border-bottom:none}
+tbody tr{transition:background .15s}
+tbody tr:hover{background:rgba(217,178,90,.06)}
+.rank-badge{display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;border-radius:6px;font-family:'Oswald';font-weight:600;font-size:13px;margin-right:10px;background:var(--panel2);color:var(--ink3)}
+.rank-badge.top{background:var(--gold);color:#1a1209}
+.pname{font-family:'Oswald';font-weight:500;font-size:16px;text-transform:uppercase;letter-spacing:.02em}
+.cname{font-weight:600;color:var(--ink)}
+.bar-cell{min-width:130px}
+.bar{height:7px;border-radius:4px;background:var(--panel2);overflow:hidden;position:relative;margin-top:5px}
+.bar>i{display:block;height:100%;border-radius:4px;background:linear-gradient(90deg,var(--G),var(--gold))}
+.wr{font-family:'Oswald';font-weight:600;font-size:15px}
+.muted{color:var(--ink3)}
+.pill{display:inline-block;padding:2px 8px;border-radius:20px;font-size:11px;font-family:'JetBrains Mono';font-weight:600;letter-spacing:.03em}
+.pill.g{background:rgba(63,155,84,.16);color:#6cc77e}
+.pill.r{background:rgba(214,68,47,.16);color:#e87a68}
+.pill.y{background:rgba(217,178,90,.16);color:var(--gold2)}
+
+/* ---------- H2H GRID ---------- */
+.h2h-scroll{overflow-x:auto;padding-bottom:6px}
+.h2h{border-collapse:separate;border-spacing:4px;margin:0 auto}
+.h2h th{padding:8px;text-align:center;border:none}
+.h2h th.corner{background:none}
+.h2h .rowhead{font-family:'Oswald';font-weight:600;font-size:14px;text-transform:uppercase;color:var(--ink2);text-align:right;padding-right:12px;white-space:nowrap}
+.h2h .colhead{font-family:'Oswald';font-weight:600;font-size:14px;text-transform:uppercase;color:var(--ink2);writing-mode:horizontal-tb;text-align:center;min-width:78px}
+.cell{width:78px;height:60px;border-radius:9px;display:flex;flex-direction:column;align-items:center;justify-content:center;position:relative;border:1px solid var(--line)}
+.cell.self{background:repeating-linear-gradient(45deg,var(--felt2),var(--felt2) 6px,var(--panel) 6px,var(--panel) 12px);border-color:var(--line)}
+.cell .pct{font-family:'Oswald';font-weight:600;font-size:19px;line-height:1}
+.cell .rec{font-size:10px;color:var(--ink3);font-family:'JetBrains Mono';margin-top:3px}
+.cell .nogame{font-size:11px;color:var(--ink3)}
+.legend{display:flex;gap:18px;flex-wrap:wrap;margin-top:18px;font-size:12px;color:var(--ink3);align-items:center}
+.legend .sw{display:inline-block;width:30px;height:12px;border-radius:3px;vertical-align:middle;margin-right:7px}
+
+/* ---------- COMMANDER CARDS ---------- */
+.cmd-controls{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:20px;align-items:center}
+.seg{display:inline-flex;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:3px}
+.seg button{font-family:'Oswald';font-weight:500;text-transform:uppercase;font-size:13px;letter-spacing:.03em;color:var(--ink3);background:none;border:none;padding:7px 14px;border-radius:7px;cursor:pointer;transition:.15s}
+.seg button.on{background:var(--gold);color:#1a1209}
+.search{flex:1;min-width:180px;max-width:280px}
+.search input{width:100%;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:10px 14px;color:var(--ink);font-family:'Inter';font-size:14px}
+.search input::placeholder{color:var(--ink3)}
+.search input:focus{outline:none;border-color:var(--gold)}
+
+.cmd-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px}
+.cmd{
+  background:linear-gradient(165deg,var(--panel2),var(--panel));
+  border:1px solid var(--line);border-radius:var(--radius);padding:18px;
+  position:relative;overflow:hidden;transition:transform .18s,border-color .18s
+}
+.cmd:hover{transform:translateY(-3px);border-color:var(--line2)}
+.cmd .topline{height:3px;position:absolute;top:0;left:0;right:0;background:linear-gradient(90deg,var(--G),var(--gold))}
+.cmd .cname{font-family:'Oswald';font-weight:600;font-size:18px;line-height:1.1;text-transform:uppercase;letter-spacing:.01em;margin-bottom:14px;min-height:40px;display:flex;align-items:flex-end}
+.cmd .row{display:flex;justify-content:space-between;align-items:center;margin-bottom:9px}
+.cmd .row .k{font-size:12px;color:var(--ink3);text-transform:uppercase;letter-spacing:.06em}
+.cmd .row .v{font-family:'Oswald';font-weight:600;font-size:17px}
+.cmd .wrbar{height:8px;border-radius:5px;background:var(--felt);overflow:hidden;margin:4px 0 14px}
+.cmd .wrbar>i{display:block;height:100%;border-radius:5px}
+.cmd .pilots{border-top:1px solid var(--line);padding-top:11px;display:flex;flex-wrap:wrap;gap:6px}
+.cmd .pilot{font-size:11px;font-family:'JetBrains Mono';background:var(--felt);border:1px solid var(--line);padding:3px 8px;border-radius:6px;color:var(--ink2)}
+.cmd .pilot b{color:var(--gold2)}
+
+/* ---------- PLAYER DETAIL ---------- */
+.pdetail-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:14px}
+.empty{padding:40px;text-align:center;color:var(--ink3)}
+
+footer{border-top:1px solid var(--line);padding:30px 0;color:var(--ink3);font-size:13px;text-align:center}
+footer b{color:var(--ink2)}
+
+@media(max-width:680px){
+  .podium{grid-template-columns:1fr;gap:12px}
+  .pod-card.p1{transform:none}
+  h1{font-size:46px}
+  .hero-stats{gap:22px}
+  td,th{padding:10px 9px;font-size:13px}
+  .hide-sm{display:none}
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="mana-ring"></div>
+  <div class="wrap hero-inner">
+    <div class="eyebrow">Commander · EDH · Game Ledger</div>
+    <h1>The Pod<br><span class="thin">Standings</span></h1>
+    <p class="sub">Every game, every commander, every finish — tracked across the playgroup. Who actually wins, and what they're winning with.</p>
+    <div class="hero-stats" id="heroStats"><div class="hstat"><div class="n">101</div><div class="l">Games logged</div></div><div class="hstat"><div class="n">369</div><div class="l">Seats played</div></div><div class="hstat"><div class="n">47</div><div class="l">Commanders</div></div><div class="hstat"><div class="n">Dec 2023 – Nov 2024</div><div class="l">Span</div></div></div>
+  </div>
+</header>
+
+<nav><div class="wrap nav-inner" id="tabs">
+  <button class="tab" data-v="leaderboard">Leaderboard</button>
+  <button class="tab" data-v="h2h">Head to Head</button>
+  <button class="tab active" data-v="commanders">Commanders</button>
+  <button class="tab" data-v="players">By Player</button>
+</div></nav>
+
+<main class="wrap">
+
+  <section class="view" id="leaderboard">
+    <div class="podium" id="podium"><div class="pod-card ">
+      <div class="medal">② Runner-up</div>
+      <div class="pod-name">Burak</div>
+      <div class="dial"><svg width="118" height="118" viewBox="0 0 118 118">
+    <circle cx="59" cy="59" r="52" fill="none" stroke="var(--felt)" stroke-width="9"></circle>
+    <circle cx="59" cy="59" r="52" fill="none" stroke="var(--mid)" stroke-width="9" stroke-linecap="round" stroke-dasharray="326.7256359733385" stroke-dashoffset="245.04422698000388"></circle>
+  </svg><div class="val"><b>25%</b><span>win rate</span></div></div>
+      <div class="pod-meta"><b>7</b> wins / <b>28</b> games · avg finish <b>2.75</b></div>
+    </div><div class="pod-card p1">
+      <div class="medal">◆ Champion</div>
+      <div class="pod-name">Dennis</div>
+      <div class="dial"><svg width="118" height="118" viewBox="0 0 118 118">
+    <circle cx="59" cy="59" r="52" fill="none" stroke="var(--felt)" stroke-width="9"></circle>
+    <circle cx="59" cy="59" r="52" fill="none" stroke="var(--win)" stroke-width="9" stroke-linecap="round" stroke-dasharray="326.7256359733385" stroke-dashoffset="195.38193031205643"></circle>
+  </svg><div class="val"><b>40.2%</b><span>win rate</span></div></div>
+      <div class="pod-meta"><b>39</b> wins / <b>97</b> games · avg finish <b>2.22</b></div>
+    </div><div class="pod-card ">
+      <div class="medal">③ Third</div>
+      <div class="pod-name">Mario</div>
+      <div class="dial"><svg width="118" height="118" viewBox="0 0 118 118">
+    <circle cx="59" cy="59" r="52" fill="none" stroke="var(--felt)" stroke-width="9"></circle>
+    <circle cx="59" cy="59" r="52" fill="none" stroke="var(--mid)" stroke-width="9" stroke-linecap="round" stroke-dasharray="326.7256359733385" stroke-dashoffset="246.0244038879239"></circle>
+  </svg><div class="val"><b>24.7%</b><span>win rate</span></div></div>
+      <div class="pod-meta"><b>20</b> wins / <b>81</b> games · avg finish <b>2.63</b></div>
+    </div></div>
+    <div class="section-head">
+      <h2>Full Standings</h2>
+      <span class="hint">Click any column to sort · win = 1st place finish</span>
+    </div>
+    <div class="panel"><table id="lbTable">
+      <thead><tr>
+        <th data-k="name" class="sortable">Player <span class="arr"></span></th>
+        <th data-k="games" class="sortable">Games <span class="arr"></span></th>
+        <th data-k="wins" class="sortable">Wins <span class="arr"></span></th>
+        <th data-k="winrate" class="sortable">Win Rate <span class="arr">▼</span></th>
+        <th data-k="winrate" class="bar-cell hide-sm">　</th>
+        <th data-k="avgrank" class="sortable">Avg Finish <span class="arr"></span></th>
+        <th data-k="solrate" class="sortable hide-sm">Sol Ring T1 <span class="arr"></span></th>
+      </tr></thead>
+      <tbody><tr>
+      <td><span class="rank-badge top">1</span><span class="pname">Dennis</span></td>
+      <td>97</td>
+      <td>39</td>
+      <td><span class="wr" style="color:var(--win)">40.2%</span></td>
+      <td class="bar-cell hide-sm"><div class="bar"><i style="width:100%"></i></div></td>
+      <td>2.22</td>
+      <td class="hide-sm">6.2%</td>
+    </tr><tr>
+      <td><span class="rank-badge ">2</span><span class="pname">Burak</span></td>
+      <td>28</td>
+      <td>7</td>
+      <td><span class="wr" style="color:var(--mid)">25%</span></td>
+      <td class="bar-cell hide-sm"><div class="bar"><i style="width:62.189054726368155%"></i></div></td>
+      <td>2.75</td>
+      <td class="hide-sm">0%</td>
+    </tr><tr>
+      <td><span class="rank-badge ">3</span><span class="pname">Mario</span></td>
+      <td>81</td>
+      <td>20</td>
+      <td><span class="wr" style="color:var(--mid)">24.7%</span></td>
+      <td class="bar-cell hide-sm"><div class="bar"><i style="width:61.44278606965173%"></i></div></td>
+      <td>2.63</td>
+      <td class="hide-sm">2.1%</td>
+    </tr><tr>
+      <td><span class="rank-badge ">4</span><span class="pname">Marco</span></td>
+      <td>101</td>
+      <td>21</td>
+      <td><span class="wr" style="color:var(--mid)">20.8%</span></td>
+      <td class="bar-cell hide-sm"><div class="bar"><i style="width:51.741293532338304%"></i></div></td>
+      <td>2.69</td>
+      <td class="hide-sm">9.1%</td>
+    </tr><tr>
+      <td><span class="rank-badge ">5</span><span class="pname">Tuan</span></td>
+      <td>52</td>
+      <td>9</td>
+      <td><span class="wr" style="color:var(--lose)">17.3%</span></td>
+      <td class="bar-cell hide-sm"><div class="bar"><i style="width:43.03482587064676%"></i></div></td>
+      <td>3</td>
+      <td class="hide-sm">2%</td>
+    </tr></tbody>
+    </table></div>
+  </section>
+
+  <section class="view" id="h2h">
+    <div class="section-head">
+      <h2>Head to Head</h2>
+      <span class="hint">Read across: how the row player finishes vs the column player when seated together</span>
+    </div>
+    <div class="panel" style="padding:20px">
+      <div class="h2h-scroll"><table class="h2h" id="h2hTable"><tbody><tr><th class="corner"></th><th class="colhead">Dennis</th><th class="colhead">Burak</th><th class="colhead">Mario</th><th class="colhead">Marco</th><th class="colhead">Tuan</th></tr><tr><th class="rowhead">Dennis</th><td><div class="cell self"></div></td><td><div class="cell" style="background:rgb(83,68,33);border-color:#2f6b3e">
+        <span class="pct" style="color:#6cc77e">56%</span>
+        <span class="rec">14–9–2</span>
+      </div></td><td><div class="cell" style="background:rgb(88,68,32);border-color:#2f6b3e">
+        <span class="pct" style="color:#f0cd7e">52%</span>
+        <span class="rec">41–26–12</span>
+      </div></td><td><div class="cell" style="background:rgb(84,68,33);border-color:#2f6b3e">
+        <span class="pct" style="color:#f0cd7e">55%</span>
+        <span class="rec">53–30–14</span>
+      </div></td><td><div class="cell" style="background:rgb(79,67,34);border-color:#2f6b3e">
+        <span class="pct" style="color:#6cc77e">59%</span>
+        <span class="rec">29–14–6</span>
+      </div></td></tr><tr><th class="rowhead">Burak</th><td><div class="cell" style="background:rgb(81,58,31);border-color:#6e3328">
+        <span class="pct" style="color:#e87a68">36%</span>
+        <span class="rec">9–14–2</span>
+      </div></td><td><div class="cell self"></div></td><td><div class="cell" style="background:rgb(90,68,32);border-color:#5a4420">
+        <span class="pct" style="color:#f0cd7e">50%</span>
+        <span class="rec">4–3–1</span>
+      </div></td><td><div class="cell" style="background:rgb(90,68,32);border-color:#5a4420">
+        <span class="pct" style="color:#f0cd7e">50%</span>
+        <span class="rec">14–10–4</span>
+      </div></td><td><div class="cell" style="background:rgb(77,53,30);border-color:#6e3328">
+        <span class="pct" style="color:#e87a68">29%</span>
+        <span class="rec">6–11–4</span>
+      </div></td></tr><tr><th class="rowhead">Mario</th><td><div class="cell" style="background:rgb(79,56,31);border-color:#6e3328">
+        <span class="pct" style="color:#e87a68">33%</span>
+        <span class="rec">26–41–12</span>
+      </div></td><td><div class="cell" style="background:rgb(82,59,31);border-color:#6e3328">
+        <span class="pct" style="color:#e87a68">38%</span>
+        <span class="rec">3–4–1</span>
+      </div></td><td><div class="cell self"></div></td><td><div class="cell" style="background:rgb(84,62,31);border-color:#6e3328">
+        <span class="pct" style="color:#e87a68">41%</span>
+        <span class="rec">33–31–17</span>
+      </div></td><td><div class="cell" style="background:rgb(84,62,31);border-color:#6e3328">
+        <span class="pct" style="color:#e87a68">41%</span>
+        <span class="rec">13–9–10</span>
+      </div></td></tr><tr><th class="rowhead">Marco</th><td><div class="cell" style="background:rgb(78,54,30);border-color:#6e3328">
+        <span class="pct" style="color:#e87a68">31%</span>
+        <span class="rec">30–53–14</span>
+      </div></td><td><div class="cell" style="background:rgb(81,58,31);border-color:#6e3328">
+        <span class="pct" style="color:#e87a68">36%</span>
+        <span class="rec">10–14–4</span>
+      </div></td><td><div class="cell" style="background:rgb(82,59,31);border-color:#6e3328">
+        <span class="pct" style="color:#e87a68">38%</span>
+        <span class="rec">31–33–17</span>
+      </div></td><td><div class="cell self"></div></td><td><div class="cell" style="background:rgb(86,64,32);border-color:#6e3328">
+        <span class="pct" style="color:#e87a68">44%</span>
+        <span class="rec">23–16–13</span>
+      </div></td></tr><tr><th class="rowhead">Tuan</th><td><div class="cell" style="background:rgb(77,53,30);border-color:#6e3328">
+        <span class="pct" style="color:#e87a68">29%</span>
+        <span class="rec">14–29–6</span>
+      </div></td><td><div class="cell" style="background:rgb(88,68,32);border-color:#2f6b3e">
+        <span class="pct" style="color:#f0cd7e">52%</span>
+        <span class="rec">11–6–4</span>
+      </div></td><td><div class="cell" style="background:rgb(76,52,30);border-color:#6e3328">
+        <span class="pct" style="color:#e87a68">28%</span>
+        <span class="rec">9–13–10</span>
+      </div></td><td><div class="cell" style="background:rgb(78,54,30);border-color:#6e3328">
+        <span class="pct" style="color:#e87a68">31%</span>
+        <span class="rec">16–23–13</span>
+      </div></td><td><div class="cell self"></div></td></tr></tbody></table></div>
+      <div class="legend">
+        <span><span class="sw" style="background:linear-gradient(90deg,#d6442f,#d9b25a)"></span>loses more</span>
+        <span><span class="sw" style="background:linear-gradient(90deg,#d9b25a,#3f9b54)"></span>wins more</span>
+        <span>% = share of shared games where the row player finished ahead</span>
+      </div>
+    </div>
+  </section>
+
+  <section class="view active" id="commanders">
+    <div class="section-head">
+      <h2>Commander Performance</h2>
+      <span class="hint" id="cmdCount">15 commanders shown</span>
+    </div>
+    <div class="cmd-controls">
+      <div class="seg" id="cmdSort">
+        <button class="" data-s="games">Most Played</button>
+        <button data-s="winrate" class="on">Best Win %</button>
+        <button data-s="avgrank">Best Finish</button>
+      </div>
+      <div class="seg" id="cmdMin">
+        <button data-m="1" class="">All</button>
+        <button data-m="5" class="">5+ games</button>
+        <button data-m="10" class="on">10+ games</button>
+      </div>
+      <div class="search"><input id="cmdSearch" placeholder="Search commander…" autocomplete="off"></div>
+    </div>
+    <div class="cmd-grid" id="cmdGrid"><div class="cmd">
+      <div class="topline"></div>
+      <div class="cname">Hakbal of the Surging Soul</div>
+      <div class="row"><span class="k">Games</span><span class="v">10</span></div>
+      <div class="row"><span class="k">Win rate</span><span class="v" style="color:var(--win)">50%</span></div>
+      <div class="wrbar"><i style="width:50%;background:var(--win)"></i></div>
+      <div class="row"><span class="k">Avg finish</span><span class="v">2.2</span></div>
+      <div class="pilots"><span class="pilot">Burak <b>7</b></span><span class="pilot">Dennis <b>3</b></span></div>
+    </div><div class="cmd">
+      <div class="topline"></div>
+      <div class="cname">Yuriko, the Tiger's Shadow</div>
+      <div class="row"><span class="k">Games</span><span class="v">11</span></div>
+      <div class="row"><span class="k">Win rate</span><span class="v" style="color:var(--win)">45.5%</span></div>
+      <div class="wrbar"><i style="width:45.5%;background:var(--win)"></i></div>
+      <div class="row"><span class="k">Avg finish</span><span class="v">1.91</span></div>
+      <div class="pilots"><span class="pilot">Dennis <b>11</b></span></div>
+    </div><div class="cmd">
+      <div class="topline"></div>
+      <div class="cname">The Mycotyrant</div>
+      <div class="row"><span class="k">Games</span><span class="v">14</span></div>
+      <div class="row"><span class="k">Win rate</span><span class="v" style="color:var(--win)">35.7%</span></div>
+      <div class="wrbar"><i style="width:35.7%;background:var(--win)"></i></div>
+      <div class="row"><span class="k">Avg finish</span><span class="v">2.5</span></div>
+      <div class="pilots"><span class="pilot">Mario <b>14</b></span></div>
+    </div><div class="cmd">
+      <div class="topline"></div>
+      <div class="cname">Yedora, Grave Gardener</div>
+      <div class="row"><span class="k">Games</span><span class="v">12</span></div>
+      <div class="row"><span class="k">Win rate</span><span class="v" style="color:var(--win)">33.3%</span></div>
+      <div class="wrbar"><i style="width:33.3%;background:var(--win)"></i></div>
+      <div class="row"><span class="k">Avg finish</span><span class="v">2.33</span></div>
+      <div class="pilots"><span class="pilot">Marco <b>12</b></span></div>
+    </div><div class="cmd">
+      <div class="topline"></div>
+      <div class="cname">Lynde, Cheerful Tormentor</div>
+      <div class="row"><span class="k">Games</span><span class="v">12</span></div>
+      <div class="row"><span class="k">Win rate</span><span class="v" style="color:var(--mid)">25%</span></div>
+      <div class="wrbar"><i style="width:25%;background:var(--mid)"></i></div>
+      <div class="row"><span class="k">Avg finish</span><span class="v">2.67</span></div>
+      <div class="pilots"><span class="pilot">Dennis <b>12</b></span></div>
+    </div><div class="cmd">
+      <div class="topline"></div>
+      <div class="cname">Ayli, Eternal Pilgrim</div>
+      <div class="row"><span class="k">Games</span><span class="v">10</span></div>
+      <div class="row"><span class="k">Win rate</span><span class="v" style="color:var(--mid)">20%</span></div>
+      <div class="wrbar"><i style="width:20%;background:var(--mid)"></i></div>
+      <div class="row"><span class="k">Avg finish</span><span class="v">2.1</span></div>
+      <div class="pilots"><span class="pilot">Mario <b>10</b></span></div>
+    </div><div class="cmd">
+      <div class="topline"></div>
+      <div class="cname">Bello, Bard of the Brambles</div>
+      <div class="row"><span class="k">Games</span><span class="v">10</span></div>
+      <div class="row"><span class="k">Win rate</span><span class="v" style="color:var(--mid)">20%</span></div>
+      <div class="wrbar"><i style="width:20%;background:var(--mid)"></i></div>
+      <div class="row"><span class="k">Avg finish</span><span class="v">3.1</span></div>
+      <div class="pilots"><span class="pilot">Marco <b>10</b></span></div>
+    </div><div class="cmd">
+      <div class="topline"></div>
+      <div class="cname">The Wise Mothman</div>
+      <div class="row"><span class="k">Games</span><span class="v">16</span></div>
+      <div class="row"><span class="k">Win rate</span><span class="v" style="color:var(--lose)">18.8%</span></div>
+      <div class="wrbar"><i style="width:18.8%;background:var(--lose)"></i></div>
+      <div class="row"><span class="k">Avg finish</span><span class="v">2.81</span></div>
+      <div class="pilots"><span class="pilot">Marco <b>16</b></span></div>
+    </div><div class="cmd">
+      <div class="topline"></div>
+      <div class="cname">Faldorn, Dread Wolf Herald</div>
+      <div class="row"><span class="k">Games</span><span class="v">11</span></div>
+      <div class="row"><span class="k">Win rate</span><span class="v" style="color:var(--lose)">18.2%</span></div>
+      <div class="wrbar"><i style="width:18.2%;background:var(--lose)"></i></div>
+      <div class="row"><span class="k">Avg finish</span><span class="v">2.64</span></div>
+      <div class="pilots"><span class="pilot">Mario <b>11</b></span></div>
+    </div><div class="cmd">
+      <div class="topline"></div>
+      <div class="cname">Zhulodok, Void Gorger</div>
+      <div class="row"><span class="k">Games</span><span class="v">18</span></div>
+      <div class="row"><span class="k">Win rate</span><span class="v" style="color:var(--lose)">16.7%</span></div>
+      <div class="wrbar"><i style="width:16.7%;background:var(--lose)"></i></div>
+      <div class="row"><span class="k">Avg finish</span><span class="v">3.22</span></div>
+      <div class="pilots"><span class="pilot">Tuan <b>17</b></span><span class="pilot">Dennis <b>1</b></span></div>
+    </div><div class="cmd">
+      <div class="topline"></div>
+      <div class="cname">Trostani, Selesnya's Voice</div>
+      <div class="row"><span class="k">Games</span><span class="v">13</span></div>
+      <div class="row"><span class="k">Win rate</span><span class="v" style="color:var(--lose)">15.4%</span></div>
+      <div class="wrbar"><i style="width:15.4%;background:var(--lose)"></i></div>
+      <div class="row"><span class="k">Avg finish</span><span class="v">2.92</span></div>
+      <div class="pilots"><span class="pilot">Tuan <b>13</b></span></div>
+    </div><div class="cmd">
+      <div class="topline"></div>
+      <div class="cname">Kaust, Eyes of the Glade</div>
+      <div class="row"><span class="k">Games</span><span class="v">22</span></div>
+      <div class="row"><span class="k">Win rate</span><span class="v" style="color:var(--lose)">13.6%</span></div>
+      <div class="wrbar"><i style="width:13.6%;background:var(--lose)"></i></div>
+      <div class="row"><span class="k">Avg finish</span><span class="v">2.73</span></div>
+      <div class="pilots"><span class="pilot">Marco <b>22</b></span></div>
+    </div><div class="cmd">
+      <div class="topline"></div>
+      <div class="cname">Lord Windgrace</div>
+      <div class="row"><span class="k">Games</span><span class="v">15</span></div>
+      <div class="row"><span class="k">Win rate</span><span class="v" style="color:var(--lose)">13.3%</span></div>
+      <div class="wrbar"><i style="width:13.3%;background:var(--lose)"></i></div>
+      <div class="row"><span class="k">Avg finish</span><span class="v">2.87</span></div>
+      <div class="pilots"><span class="pilot">Marco <b>15</b></span></div>
+    </div><div class="cmd">
+      <div class="topline"></div>
+      <div class="cname">Ulalek, Fused Atrocity</div>
+      <div class="row"><span class="k">Games</span><span class="v">10</span></div>
+      <div class="row"><span class="k">Win rate</span><span class="v" style="color:var(--lose)">10%</span></div>
+      <div class="wrbar"><i style="width:10%;background:var(--lose)"></i></div>
+      <div class="row"><span class="k">Avg finish</span><span class="v">2.9</span></div>
+      <div class="pilots"><span class="pilot">Tuan <b>10</b></span></div>
+    </div><div class="cmd">
+      <div class="topline"></div>
+      <div class="cname">Chishiro, the Shattered Blade</div>
+      <div class="row"><span class="k">Games</span><span class="v">11</span></div>
+      <div class="row"><span class="k">Win rate</span><span class="v" style="color:var(--lose)">9.1%</span></div>
+      <div class="wrbar"><i style="width:9.1%;background:var(--lose)"></i></div>
+      <div class="row"><span class="k">Avg finish</span><span class="v">3</span></div>
+      <div class="pilots"><span class="pilot">Burak <b>11</b></span></div>
+    </div></div>
+  </section>
+
+  <section class="view" id="players">
+    <div class="section-head">
+      <h2>By Player</h2>
+      <span class="hint">Each pilot's decks, ranked by games played</span>
+    </div>
+    <div class="cmd-controls">
+      <div class="seg" id="playerPick"><button data-p="Dennis" class="on">Dennis</button><button data-p="Burak" class="">Burak</button><button data-p="Mario" class="">Mario</button><button data-p="Marco" class="">Marco</button><button data-p="Tuan" class="">Tuan</button></div>
+    </div>
+    <div id="playerBody">
+    <div style="margin-bottom:20px;display:flex;gap:26px;flex-wrap:wrap;align-items:center">
+      <div><span style="font-family:'Oswald';font-weight:600;font-size:22px;color:var(--gold2)">40.2%</span> <span class="muted" style="font-size:13px">overall win rate</span></div>
+      <div><span style="font-family:'Oswald';font-weight:600;font-size:22px">97</span> <span class="muted" style="font-size:13px">games</span></div>
+      <div><span style="font-family:'Oswald';font-weight:600;font-size:22px">2.22</span> <span class="muted" style="font-size:13px">avg finish</span></div>
+      <div><span style="font-family:'Oswald';font-weight:600;font-size:22px">16</span> <span class="muted" style="font-size:13px">decks piloted</span></div>
+    </div>
+    <div class="cmd-grid pdetail-grid">
+      <div class="cmd"><div class="topline"></div>
+        <div class="cname">Lynde, Cheerful Tormentor</div>
+        <div class="row"><span class="k">Games</span><span class="v">12</span></div>
+        <div class="row"><span class="k">Wins</span><span class="v">3</span></div>
+        <div class="wrbar"><i style="width:25%;background:var(--mid)"></i></div>
+        <div class="row" style="margin-bottom:0"><span class="k">Win rate / finish</span><span class="v"><span style="color:var(--mid)">25%</span> <span class="muted" style="font-size:13px">· 2.67</span></span></div>
+      </div>
+      <div class="cmd"><div class="topline"></div>
+        <div class="cname">Yuriko, the Tiger's Shadow</div>
+        <div class="row"><span class="k">Games</span><span class="v">11</span></div>
+        <div class="row"><span class="k">Wins</span><span class="v">5</span></div>
+        <div class="wrbar"><i style="width:45.5%;background:var(--win)"></i></div>
+        <div class="row" style="margin-bottom:0"><span class="k">Win rate / finish</span><span class="v"><span style="color:var(--win)">45.5%</span> <span class="muted" style="font-size:13px">· 1.91</span></span></div>
+      </div>
+      <div class="cmd"><div class="topline"></div>
+        <div class="cname">Veyran, Voice of Duality</div>
+        <div class="row"><span class="k">Games</span><span class="v">8</span></div>
+        <div class="row"><span class="k">Wins</span><span class="v">4</span></div>
+        <div class="wrbar"><i style="width:50%;background:var(--win)"></i></div>
+        <div class="row" style="margin-bottom:0"><span class="k">Win rate / finish</span><span class="v"><span style="color:var(--win)">50%</span> <span class="muted" style="font-size:13px">· 2</span></span></div>
+      </div>
+      <div class="cmd"><div class="topline"></div>
+        <div class="cname">Massacre Girl, Known Killer</div>
+        <div class="row"><span class="k">Games</span><span class="v">8</span></div>
+        <div class="row"><span class="k">Wins</span><span class="v">4</span></div>
+        <div class="wrbar"><i style="width:50%;background:var(--win)"></i></div>
+        <div class="row" style="margin-bottom:0"><span class="k">Win rate / finish</span><span class="v"><span style="color:var(--win)">50%</span> <span class="muted" style="font-size:13px">· 2.12</span></span></div>
+      </div>
+      <div class="cmd"><div class="topline"></div>
+        <div class="cname">Gix, Yawgmoth Praetor</div>
+        <div class="row"><span class="k">Games</span><span class="v">8</span></div>
+        <div class="row"><span class="k">Wins</span><span class="v">4</span></div>
+        <div class="wrbar"><i style="width:50%;background:var(--win)"></i></div>
+        <div class="row" style="margin-bottom:0"><span class="k">Win rate / finish</span><span class="v"><span style="color:var(--win)">50%</span> <span class="muted" style="font-size:13px">· 2</span></span></div>
+      </div>
+      <div class="cmd"><div class="topline"></div>
+        <div class="cname">Anowon, the Ruin Thief</div>
+        <div class="row"><span class="k">Games</span><span class="v">8</span></div>
+        <div class="row"><span class="k">Wins</span><span class="v">2</span></div>
+        <div class="wrbar"><i style="width:25%;background:var(--mid)"></i></div>
+        <div class="row" style="margin-bottom:0"><span class="k">Win rate / finish</span><span class="v"><span style="color:var(--mid)">25%</span> <span class="muted" style="font-size:13px">· 2.88</span></span></div>
+      </div>
+      <div class="cmd"><div class="topline"></div>
+        <div class="cname">Queen Marchesa</div>
+        <div class="row"><span class="k">Games</span><span class="v">8</span></div>
+        <div class="row"><span class="k">Wins</span><span class="v">2</span></div>
+        <div class="wrbar"><i style="width:25%;background:var(--mid)"></i></div>
+        <div class="row" style="margin-bottom:0"><span class="k">Win rate / finish</span><span class="v"><span style="color:var(--mid)">25%</span> <span class="muted" style="font-size:13px">· 3</span></span></div>
+      </div>
+      <div class="cmd"><div class="topline"></div>
+        <div class="cname">Jarad, Golgari Lich Lord</div>
+        <div class="row"><span class="k">Games</span><span class="v">7</span></div>
+        <div class="row"><span class="k">Wins</span><span class="v">3</span></div>
+        <div class="wrbar"><i style="width:42.9%;background:var(--win)"></i></div>
+        <div class="row" style="margin-bottom:0"><span class="k">Win rate / finish</span><span class="v"><span style="color:var(--win)">42.9%</span> <span class="muted" style="font-size:13px">· 2</span></span></div>
+      </div>
+      <div class="cmd"><div class="topline"></div>
+        <div class="cname">Zevlor, Elturel Exile</div>
+        <div class="row"><span class="k">Games</span><span class="v">7</span></div>
+        <div class="row"><span class="k">Wins</span><span class="v">1</span></div>
+        <div class="wrbar"><i style="width:14.3%;background:var(--lose)"></i></div>
+        <div class="row" style="margin-bottom:0"><span class="k">Win rate / finish</span><span class="v"><span style="color:var(--lose)">14.3%</span> <span class="muted" style="font-size:13px">· 2.29</span></span></div>
+      </div>
+      <div class="cmd"><div class="topline"></div>
+        <div class="cname">Nekusar, the Mindrazer</div>
+        <div class="row"><span class="k">Games</span><span class="v">6</span></div>
+        <div class="row"><span class="k">Wins</span><span class="v">2</span></div>
+        <div class="wrbar"><i style="width:33.3%;background:var(--win)"></i></div>
+        <div class="row" style="margin-bottom:0"><span class="k">Win rate / finish</span><span class="v"><span style="color:var(--win)">33.3%</span> <span class="muted" style="font-size:13px">· 2</span></span></div>
+      </div>
+      <div class="cmd"><div class="topline"></div>
+        <div class="cname">Baral, Chief of Compliance</div>
+        <div class="row"><span class="k">Games</span><span class="v">5</span></div>
+        <div class="row"><span class="k">Wins</span><span class="v">3</span></div>
+        <div class="wrbar"><i style="width:60%;background:var(--win)"></i></div>
+        <div class="row" style="margin-bottom:0"><span class="k">Win rate / finish</span><span class="v"><span style="color:var(--win)">60%</span> <span class="muted" style="font-size:13px">· 1.8</span></span></div>
+      </div>
+      <div class="cmd"><div class="topline"></div>
+        <div class="cname">Hakbal of the Surging Soul</div>
+        <div class="row"><span class="k">Games</span><span class="v">3</span></div>
+        <div class="row"><span class="k">Wins</span><span class="v">3</span></div>
+        <div class="wrbar"><i style="width:100%;background:var(--win)"></i></div>
+        <div class="row" style="margin-bottom:0"><span class="k">Win rate / finish</span><span class="v"><span style="color:var(--win)">100%</span> <span class="muted" style="font-size:13px">· 1</span></span></div>
+      </div>
+      <div class="cmd"><div class="topline"></div>
+        <div class="cname">Tinybones, Trinket Thief</div>
+        <div class="row"><span class="k">Games</span><span class="v">3</span></div>
+        <div class="row"><span class="k">Wins</span><span class="v">1</span></div>
+        <div class="wrbar"><i style="width:33.3%;background:var(--win)"></i></div>
+        <div class="row" style="margin-bottom:0"><span class="k">Win rate / finish</span><span class="v"><span style="color:var(--win)">33.3%</span> <span class="muted" style="font-size:13px">· 2.33</span></span></div>
+      </div>
+      <div class="cmd"><div class="topline"></div>
+        <div class="cname">Captain N'ghathrod</div>
+        <div class="row"><span class="k">Games</span><span class="v">1</span></div>
+        <div class="row"><span class="k">Wins</span><span class="v">1</span></div>
+        <div class="wrbar"><i style="width:100%;background:var(--win)"></i></div>
+        <div class="row" style="margin-bottom:0"><span class="k">Win rate / finish</span><span class="v"><span style="color:var(--win)">100%</span> <span class="muted" style="font-size:13px">· 1</span></span></div>
+      </div>
+      <div class="cmd"><div class="topline"></div>
+        <div class="cname">Talrand, Sky Summoner</div>
+        <div class="row"><span class="k">Games</span><span class="v">1</span></div>
+        <div class="row"><span class="k">Wins</span><span class="v">1</span></div>
+        <div class="wrbar"><i style="width:100%;background:var(--win)"></i></div>
+        <div class="row" style="margin-bottom:0"><span class="k">Win rate / finish</span><span class="v"><span style="color:var(--win)">100%</span> <span class="muted" style="font-size:13px">· 1</span></span></div>
+      </div>
+      <div class="cmd"><div class="topline"></div>
+        <div class="cname">Zhulodok, Void Gorger</div>
+        <div class="row"><span class="k">Games</span><span class="v">1</span></div>
+        <div class="row"><span class="k">Wins</span><span class="v">0</span></div>
+        <div class="wrbar"><i style="width:2%;background:var(--lose)"></i></div>
+        <div class="row" style="margin-bottom:0"><span class="k">Win rate / finish</span><span class="v"><span style="color:var(--lose)">0%</span> <span class="muted" style="font-size:13px">· 3</span></span></div>
+      </div></div></div>
+  </section>
+
+</main>
+
+<footer class="wrap">
+  Built from <b id="footMeta">101 games · 7 players · 47 commanders</b> · Commander League Tracker
+</footer>
+
+<script>
+const DATA = {"meta": {"total_games": 101, "total_seats": 369, "date_range": ["2023-12-22", "2024-11-02"], "n_players": 7, "n_commanders": 47, "pods": ["Drei", "Gruppe A", "Gruppe B", "Gruppe C", "Gruppe D", "Gruppe E", "Gruppe F", "Tuan, Burak, Maico"]}, "players": [{"name": "Dennis", "games": 97, "wins": 39, "winrate": 40.2, "avgrank": 2.22, "solrate": 6.2, "sol_n": 64, "firstdate": "2023-12-22", "lastdate": "2024-10-31", "rankdist": {"3": 28, "2": 14, "1": 39, "4": 16}}, {"name": "Carsten", "games": 9, "wins": 3, "winrate": 33.3, "avgrank": 2.22, "solrate": 33.3, "sol_n": 9, "firstdate": "2024-10-13", "lastdate": "2024-11-02", "rankdist": {"1": 3, "3": 3, "4": 1, "2": 2}}, {"name": "Burak", "games": 28, "wins": 7, "winrate": 25.0, "avgrank": 2.75, "solrate": 0.0, "sol_n": 26, "firstdate": "2024-05-20", "lastdate": "2024-10-20", "rankdist": {"4": 9, "2": 2, "1": 7, "3": 10}}, {"name": "Mario", "games": 81, "wins": 20, "winrate": 24.7, "avgrank": 2.63, "solrate": 2.1, "sol_n": 48, "firstdate": "2023-12-22", "lastdate": "2024-11-02", "rankdist": {"2": 12, "3": 27, "1": 20, "4": 22}}, {"name": "Marco", "games": 101, "wins": 21, "winrate": 20.8, "avgrank": 2.69, "solrate": 9.1, "sol_n": 66, "firstdate": "2023-12-22", "lastdate": "2024-11-02", "rankdist": {"1": 21, "3": 39, "2": 15, "4": 26}}, {"name": "Tuan", "games": 52, "wins": 9, "winrate": 17.3, "avgrank": 3.0, "solrate": 2.0, "sol_n": 50, "firstdate": "2024-02-12", "lastdate": "2024-10-31", "rankdist": {"3": 11, "4": 25, "1": 9, "2": 7}}, {"name": "Franky", "games": 1, "wins": 0, "winrate": 0.0, "avgrank": 2.0, "solrate": 100.0, "sol_n": 1, "firstdate": "2024-11-02", "lastdate": "2024-11-02", "rankdist": {"2": 1}}], "h2h": {"Marco": {"Mario": {"games": 81, "a_better": 31, "b_better": 33, "ties": 17}, "Dennis": {"games": 97, "a_better": 30, "b_better": 53, "ties": 14}, "Burak": {"games": 28, "a_better": 10, "b_better": 14, "ties": 4}, "Tuan": {"games": 52, "a_better": 23, "b_better": 16, "ties": 13}, "Carsten": {"games": 9, "a_better": 2, "b_better": 6, "ties": 1}, "Franky": {"games": 1, "a_better": 1, "b_better": 0, "ties": 0}}, "Mario": {"Marco": {"games": 81, "a_better": 33, "b_better": 31, "ties": 17}, "Dennis": {"games": 79, "a_better": 26, "b_better": 41, "ties": 12}, "Burak": {"games": 8, "a_better": 3, "b_better": 4, "ties": 1}, "Tuan": {"games": 32, "a_better": 13, "b_better": 9, "ties": 10}, "Carsten": {"games": 9, "a_better": 3, "b_better": 6, "ties": 0}, "Franky": {"games": 1, "a_better": 0, "b_better": 1, "ties": 0}}, "Dennis": {"Marco": {"games": 97, "a_better": 53, "b_better": 30, "ties": 14}, "Mario": {"games": 79, "a_better": 41, "b_better": 26, "ties": 12}, "Burak": {"games": 25, "a_better": 14, "b_better": 9, "ties": 2}, "Tuan": {"games": 49, "a_better": 29, "b_better": 14, "ties": 6}, "Carsten": {"games": 8, "a_better": 4, "b_better": 4, "ties": 0}}, "Burak": {"Marco": {"games": 28, "a_better": 14, "b_better": 10, "ties": 4}, "Mario": {"games": 8, "a_better": 4, "b_better": 3, "ties": 1}, "Tuan": {"games": 21, "a_better": 6, "b_better": 11, "ties": 4}, "Dennis": {"games": 25, "a_better": 9, "b_better": 14, "ties": 2}}, "Tuan": {"Marco": {"games": 52, "a_better": 16, "b_better": 23, "ties": 13}, "Burak": {"games": 21, "a_better": 11, "b_better": 6, "ties": 4}, "Mario": {"games": 32, "a_better": 9, "b_better": 13, "ties": 10}, "Dennis": {"games": 49, "a_better": 14, "b_better": 29, "ties": 6}}, "Carsten": {"Marco": {"games": 9, "a_better": 6, "b_better": 2, "ties": 1}, "Mario": {"games": 9, "a_better": 6, "b_better": 3, "ties": 0}, "Dennis": {"games": 8, "a_better": 4, "b_better": 4, "ties": 0}, "Franky": {"games": 1, "a_better": 0, "b_better": 1, "ties": 0}}, "Franky": {"Marco": {"games": 1, "a_better": 0, "b_better": 1, "ties": 0}, "Carsten": {"games": 1, "a_better": 1, "b_better": 0, "ties": 0}, "Mario": {"games": 1, "a_better": 1, "b_better": 0, "ties": 0}}}, "commanders": [{"name": "Kaust, Eyes of the Glade", "games": 22, "wins": 3, "winrate": 13.6, "avgrank": 2.73, "pilots": [{"player": "Marco", "games": 22}]}, {"name": "Zhulodok, Void Gorger", "games": 18, "wins": 3, "winrate": 16.7, "avgrank": 3.22, "pilots": [{"player": "Tuan", "games": 17}, {"player": "Dennis", "games": 1}]}, {"name": "The Wise Mothman", "games": 16, "wins": 3, "winrate": 18.8, "avgrank": 2.81, "pilots": [{"player": "Marco", "games": 16}]}, {"name": "Lord Windgrace", "games": 15, "wins": 2, "winrate": 13.3, "avgrank": 2.87, "pilots": [{"player": "Marco", "games": 15}]}, {"name": "The Mycotyrant", "games": 14, "wins": 5, "winrate": 35.7, "avgrank": 2.5, "pilots": [{"player": "Mario", "games": 14}]}, {"name": "Trostani, Selesnya's Voice", "games": 13, "wins": 2, "winrate": 15.4, "avgrank": 2.92, "pilots": [{"player": "Tuan", "games": 13}]}, {"name": "Yedora, Grave Gardener", "games": 12, "wins": 4, "winrate": 33.3, "avgrank": 2.33, "pilots": [{"player": "Marco", "games": 12}]}, {"name": "Lynde, Cheerful Tormentor", "games": 12, "wins": 3, "winrate": 25.0, "avgrank": 2.67, "pilots": [{"player": "Dennis", "games": 12}]}, {"name": "Yuriko, the Tiger's Shadow", "games": 11, "wins": 5, "winrate": 45.5, "avgrank": 1.91, "pilots": [{"player": "Dennis", "games": 11}]}, {"name": "Faldorn, Dread Wolf Herald", "games": 11, "wins": 2, "winrate": 18.2, "avgrank": 2.64, "pilots": [{"player": "Mario", "games": 11}]}, {"name": "Chishiro, the Shattered Blade", "games": 11, "wins": 1, "winrate": 9.1, "avgrank": 3.0, "pilots": [{"player": "Burak", "games": 11}]}, {"name": "Hakbal of the Surging Soul", "games": 10, "wins": 5, "winrate": 50.0, "avgrank": 2.2, "pilots": [{"player": "Burak", "games": 7}, {"player": "Dennis", "games": 3}]}, {"name": "Ayli, Eternal Pilgrim", "games": 10, "wins": 2, "winrate": 20.0, "avgrank": 2.1, "pilots": [{"player": "Mario", "games": 10}]}, {"name": "Bello, Bard of the Brambles", "games": 10, "wins": 2, "winrate": 20.0, "avgrank": 3.1, "pilots": [{"player": "Marco", "games": 10}]}, {"name": "Ulalek, Fused Atrocity", "games": 10, "wins": 1, "winrate": 10.0, "avgrank": 2.9, "pilots": [{"player": "Tuan", "games": 10}]}, {"name": "Neyali, Suns' Vanguard", "games": 9, "wins": 3, "winrate": 33.3, "avgrank": 2.22, "pilots": [{"player": "Carsten", "games": 9}]}, {"name": "Kutzil, Malamet Exemplar", "games": 9, "wins": 0, "winrate": 0.0, "avgrank": 3.67, "pilots": [{"player": "Mario", "games": 9}]}, {"name": "Mishra, Eminent One", "games": 9, "wins": 0, "winrate": 0.0, "avgrank": 3.56, "pilots": [{"player": "Mario", "games": 9}]}, {"name": "Veyran, Voice of Duality", "games": 8, "wins": 4, "winrate": 50.0, "avgrank": 2.0, "pilots": [{"player": "Dennis", "games": 8}]}, {"name": "Massacre Girl, Known Killer", "games": 8, "wins": 4, "winrate": 50.0, "avgrank": 2.12, "pilots": [{"player": "Dennis", "games": 8}]}, {"name": "Gix, Yawgmoth Praetor", "games": 8, "wins": 4, "winrate": 50.0, "avgrank": 2.0, "pilots": [{"player": "Dennis", "games": 8}]}, {"name": "Oloro, Ageless Ascetic", "games": 8, "wins": 3, "winrate": 37.5, "avgrank": 2.25, "pilots": [{"player": "Mario", "games": 8}]}, {"name": "Strefan, Maurer Progenitor", "games": 8, "wins": 3, "winrate": 37.5, "avgrank": 2.25, "pilots": [{"player": "Tuan", "games": 8}]}, {"name": "Anowon, the Ruin Thief", "games": 8, "wins": 2, "winrate": 25.0, "avgrank": 2.88, "pilots": [{"player": "Dennis", "games": 8}]}, {"name": "Queen Marchesa", "games": 8, "wins": 2, "winrate": 25.0, "avgrank": 3.0, "pilots": [{"player": "Dennis", "games": 8}]}, {"name": "Savra, Queen of the Golgari", "games": 8, "wins": 2, "winrate": 25.0, "avgrank": 2.5, "pilots": [{"player": "Marco", "games": 8}]}, {"name": "Atraxa, Praetors' Voice", "games": 7, "wins": 3, "winrate": 42.9, "avgrank": 2.29, "pilots": [{"player": "Marco", "games": 7}]}, {"name": "Jarad, Golgari Lich Lord", "games": 7, "wins": 3, "winrate": 42.9, "avgrank": 2.0, "pilots": [{"player": "Dennis", "games": 7}]}, {"name": "Krenko, Mob Boss", "games": 7, "wins": 3, "winrate": 42.9, "avgrank": 2.29, "pilots": [{"player": "Burak", "games": 7}]}, {"name": "Zevlor, Elturel Exile", "games": 7, "wins": 1, "winrate": 14.3, "avgrank": 2.29, "pilots": [{"player": "Dennis", "games": 7}]}, {"name": "Nekusar, the Mindrazer", "games": 6, "wins": 2, "winrate": 33.3, "avgrank": 2.0, "pilots": [{"player": "Dennis", "games": 6}]}, {"name": "Wayta, Trainer Prodigy", "games": 6, "wins": 2, "winrate": 33.3, "avgrank": 2.5, "pilots": [{"player": "Mario", "games": 6}]}, {"name": "Malcolm, Keen-Eyed Navigator", "games": 6, "wins": 1, "winrate": 16.7, "avgrank": 2.83, "pilots": [{"player": "Marco", "games": 6}]}, {"name": "Pantlaza, Sun-Favored", "games": 5, "wins": 5, "winrate": 100.0, "avgrank": 1.0, "pilots": [{"player": "Mario", "games": 5}]}, {"name": "Baral, Chief of Compliance", "games": 5, "wins": 3, "winrate": 60.0, "avgrank": 1.8, "pilots": [{"player": "Dennis", "games": 5}]}, {"name": "Wilhelt, the Rotcleaver", "games": 5, "wins": 1, "winrate": 20.0, "avgrank": 2.4, "pilots": [{"player": "Marco", "games": 5}]}, {"name": "Círdan the Shipwright", "games": 4, "wins": 0, "winrate": 0.0, "avgrank": 3.5, "pilots": [{"player": "Mario", "games": 4}]}, {"name": "Otharri, Suns' Glory", "games": 3, "wins": 1, "winrate": 33.3, "avgrank": 2.0, "pilots": [{"player": "Mario", "games": 3}]}, {"name": "Tinybones, Trinket Thief", "games": 3, "wins": 1, "winrate": 33.3, "avgrank": 2.33, "pilots": [{"player": "Dennis", "games": 3}]}, {"name": "Athreos, God of Passage", "games": 3, "wins": 0, "winrate": 0.0, "avgrank": 4.0, "pilots": [{"player": "Tuan", "games": 3}]}, {"name": "Zinnia, Valley's Voice", "games": 2, "wins": 1, "winrate": 50.0, "avgrank": 2.5, "pilots": [{"player": "Burak", "games": 2}]}, {"name": "Kardur, Doomscourge", "games": 2, "wins": 0, "winrate": 0.0, "avgrank": 2.5, "pilots": [{"player": "Mario", "games": 2}]}, {"name": "Captain N'ghathrod", "games": 1, "wins": 1, "winrate": 100.0, "avgrank": 1.0, "pilots": [{"player": "Dennis", "games": 1}]}, {"name": "Talrand, Sky Summoner", "games": 1, "wins": 1, "winrate": 100.0, "avgrank": 1.0, "pilots": [{"player": "Dennis", "games": 1}]}, {"name": "Brimaz, Blight of Oreskos", "games": 1, "wins": 0, "winrate": 0.0, "avgrank": 4.0, "pilots": [{"player": "Burak", "games": 1}]}, {"name": "Be'lakor, the Dark Master", "games": 1, "wins": 0, "winrate": 0.0, "avgrank": 4.0, "pilots": [{"player": "Tuan", "games": 1}]}, {"name": "Felix Five-Boots", "games": 1, "wins": 0, "winrate": 0.0, "avgrank": 2.0, "pilots": [{"player": "Franky", "games": 1}]}], "playercommanders": {"Marco": [{"commander": "Kaust, Eyes of the Glade", "games": 22, "wins": 3, "winrate": 13.6, "avgrank": 2.73}, {"commander": "The Wise Mothman", "games": 16, "wins": 3, "winrate": 18.8, "avgrank": 2.81}, {"commander": "Lord Windgrace", "games": 15, "wins": 2, "winrate": 13.3, "avgrank": 2.87}, {"commander": "Yedora, Grave Gardener", "games": 12, "wins": 4, "winrate": 33.3, "avgrank": 2.33}, {"commander": "Bello, Bard of the Brambles", "games": 10, "wins": 2, "winrate": 20.0, "avgrank": 3.1}, {"commander": "Savra, Queen of the Golgari", "games": 8, "wins": 2, "winrate": 25.0, "avgrank": 2.5}, {"commander": "Atraxa, Praetors' Voice", "games": 7, "wins": 3, "winrate": 42.9, "avgrank": 2.29}, {"commander": "Malcolm, Keen-Eyed Navigator", "games": 6, "wins": 1, "winrate": 16.7, "avgrank": 2.83}, {"commander": "Wilhelt, the Rotcleaver", "games": 5, "wins": 1, "winrate": 20.0, "avgrank": 2.4}], "Mario": [{"commander": "The Mycotyrant", "games": 14, "wins": 5, "winrate": 35.7, "avgrank": 2.5}, {"commander": "Faldorn, Dread Wolf Herald", "games": 11, "wins": 2, "winrate": 18.2, "avgrank": 2.64}, {"commander": "Ayli, Eternal Pilgrim", "games": 10, "wins": 2, "winrate": 20.0, "avgrank": 2.1}, {"commander": "Kutzil, Malamet Exemplar", "games": 9, "wins": 0, "winrate": 0.0, "avgrank": 3.67}, {"commander": "Mishra, Eminent One", "games": 9, "wins": 0, "winrate": 0.0, "avgrank": 3.56}, {"commander": "Oloro, Ageless Ascetic", "games": 8, "wins": 3, "winrate": 37.5, "avgrank": 2.25}, {"commander": "Wayta, Trainer Prodigy", "games": 6, "wins": 2, "winrate": 33.3, "avgrank": 2.5}, {"commander": "Pantlaza, Sun-Favored", "games": 5, "wins": 5, "winrate": 100.0, "avgrank": 1.0}, {"commander": "Círdan the Shipwright", "games": 4, "wins": 0, "winrate": 0.0, "avgrank": 3.5}, {"commander": "Otharri, Suns' Glory", "games": 3, "wins": 1, "winrate": 33.3, "avgrank": 2.0}, {"commander": "Kardur, Doomscourge", "games": 2, "wins": 0, "winrate": 0.0, "avgrank": 2.5}], "Dennis": [{"commander": "Lynde, Cheerful Tormentor", "games": 12, "wins": 3, "winrate": 25.0, "avgrank": 2.67}, {"commander": "Yuriko, the Tiger's Shadow", "games": 11, "wins": 5, "winrate": 45.5, "avgrank": 1.91}, {"commander": "Veyran, Voice of Duality", "games": 8, "wins": 4, "winrate": 50.0, "avgrank": 2.0}, {"commander": "Massacre Girl, Known Killer", "games": 8, "wins": 4, "winrate": 50.0, "avgrank": 2.12}, {"commander": "Gix, Yawgmoth Praetor", "games": 8, "wins": 4, "winrate": 50.0, "avgrank": 2.0}, {"commander": "Anowon, the Ruin Thief", "games": 8, "wins": 2, "winrate": 25.0, "avgrank": 2.88}, {"commander": "Queen Marchesa", "games": 8, "wins": 2, "winrate": 25.0, "avgrank": 3.0}, {"commander": "Jarad, Golgari Lich Lord", "games": 7, "wins": 3, "winrate": 42.9, "avgrank": 2.0}, {"commander": "Zevlor, Elturel Exile", "games": 7, "wins": 1, "winrate": 14.3, "avgrank": 2.29}, {"commander": "Nekusar, the Mindrazer", "games": 6, "wins": 2, "winrate": 33.3, "avgrank": 2.0}, {"commander": "Baral, Chief of Compliance", "games": 5, "wins": 3, "winrate": 60.0, "avgrank": 1.8}, {"commander": "Hakbal of the Surging Soul", "games": 3, "wins": 3, "winrate": 100.0, "avgrank": 1.0}, {"commander": "Tinybones, Trinket Thief", "games": 3, "wins": 1, "winrate": 33.3, "avgrank": 2.33}, {"commander": "Captain N'ghathrod", "games": 1, "wins": 1, "winrate": 100.0, "avgrank": 1.0}, {"commander": "Talrand, Sky Summoner", "games": 1, "wins": 1, "winrate": 100.0, "avgrank": 1.0}, {"commander": "Zhulodok, Void Gorger", "games": 1, "wins": 0, "winrate": 0.0, "avgrank": 3.0}], "Burak": [{"commander": "Chishiro, the Shattered Blade", "games": 11, "wins": 1, "winrate": 9.1, "avgrank": 3.0}, {"commander": "Krenko, Mob Boss", "games": 7, "wins": 3, "winrate": 42.9, "avgrank": 2.29}, {"commander": "Hakbal of the Surging Soul", "games": 7, "wins": 2, "winrate": 28.6, "avgrank": 2.71}, {"commander": "Zinnia, Valley's Voice", "games": 2, "wins": 1, "winrate": 50.0, "avgrank": 2.5}, {"commander": "Brimaz, Blight of Oreskos", "games": 1, "wins": 0, "winrate": 0.0, "avgrank": 4.0}], "Tuan": [{"commander": "Zhulodok, Void Gorger", "games": 17, "wins": 3, "winrate": 17.6, "avgrank": 3.24}, {"commander": "Trostani, Selesnya's Voice", "games": 13, "wins": 2, "winrate": 15.4, "avgrank": 2.92}, {"commander": "Ulalek, Fused Atrocity", "games": 10, "wins": 1, "winrate": 10.0, "avgrank": 2.9}, {"commander": "Strefan, Maurer Progenitor", "games": 8, "wins": 3, "winrate": 37.5, "avgrank": 2.25}, {"commander": "Athreos, God of Passage", "games": 3, "wins": 0, "winrate": 0.0, "avgrank": 4.0}, {"commander": "Be'lakor, the Dark Master", "games": 1, "wins": 0, "winrate": 0.0, "avgrank": 4.0}], "Carsten": [{"commander": "Neyali, Suns' Vanguard", "games": 9, "wins": 3, "winrate": 33.3, "avgrank": 2.22}], "Franky": [{"commander": "Felix Five-Boots", "games": 1, "wins": 0, "winrate": 0.0, "avgrank": 2.0}]}, "timeline": {"months": ["2023-12", "2024-01", "2024-02", "2024-03", "2024-04", "2024-05", "2024-06", "2024-07", "2024-08", "2024-09", "2024-10", "2024-11"], "players": {"Dennis": [20.0, 38.5, 18.2, 50.0, 62.5, 0.0, 16.7, 80.0, 40.0, 33.3, 44.4, null], "Burak": [null, null, null, null, null, 50.0, 25.0, 14.3, 20.0, 20.0, 40.0, null], "Mario": [40.0, 38.5, 54.5, 12.5, 0.0, 50.0, 25.0, 0.0, 20.0, 16.7, 13.3, 0.0], "Marco": [40.0, 23.1, 18.2, 37.5, 25.0, 25.0, 12.5, 0.0, 33.3, 22.2, 11.1, 100.0], "Tuan": [null, null, 33.3, 0.0, 14.3, 25.0, 25.0, 10.0, 0.0, 28.6, 12.5, null]}}};
+
+/* ---------- helpers ---------- */
+const $ = s => document.querySelector(s);
+const el = (t,c,h)=>{const e=document.createElement(t);if(c)e.className=c;if(h!=null)e.innerHTML=h;return e;};
+const wrColor = wr => wr>=33?'var(--win)': wr>=20?'var(--mid)':'var(--lose)';
+function lerp(a,b,t){return a+(b-a)*t;}
+function hexToRgb(h){h=h.replace('#','');return[parseInt(h.slice(0,2),16),parseInt(h.slice(2,4),16),parseInt(h.slice(4,6),16)];}
+function mix(c1,c2,t){const a=hexToRgb(c1),b=hexToRgb(c2);return`rgb(${a.map((v,i)=>Math.round(lerp(v,b[i],t))).join(',')})`;}
+
+const CORE = DATA.players.filter(p=>p.games>=20).map(p=>p.name);
+
+/* ---------- hero ---------- */
+(function(){
+  const m=DATA.meta;
+  const fmt=d=>{const[y,mo]=d.split('-');return new Date(y,mo-1).toLocaleString('en',{month:'short',year:'numeric'});};
+  const stats=[
+    [m.total_games,'Games logged'],
+    [m.total_seats,'Seats played'],
+    [m.n_commanders,'Commanders'],
+    [fmt(m.date_range[0])+' – '+fmt(m.date_range[1]),'Span'],
+  ];
+  $('#heroStats').innerHTML = stats.map(s=>`<div class="hstat"><div class="n">${s[0]}</div><div class="l">${s[1]}</div></div>`).join('');
+  $('#footMeta').textContent = `${m.total_games} games · ${m.n_players} players · ${m.n_commanders} commanders`;
+})();
+
+/* ---------- tabs ---------- */
+$('#tabs').addEventListener('click',e=>{
+  const b=e.target.closest('.tab'); if(!b)return;
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+  b.classList.add('active'); $('#'+b.dataset.v).classList.add('active');
+  window.scrollTo({top:0,behavior:'smooth'});
+});
+
+/* ---------- podium dial ---------- */
+function dial(wr){
+  const r=52,c=2*Math.PI*r,off=c*(1-wr/100);
+  return `<div class="dial"><svg width="118" height="118" viewBox="0 0 118 118">
+    <circle cx="59" cy="59" r="${r}" fill="none" stroke="var(--felt)" stroke-width="9"/>
+    <circle cx="59" cy="59" r="${r}" fill="none" stroke="${wrColor(wr)}" stroke-width="9"
+      stroke-linecap="round" stroke-dasharray="${c}" stroke-dashoffset="${off}"/>
+  </svg><div class="val"><b>${wr}%</b><span>win rate</span></div></div>`;
+}
+
+/* ---------- leaderboard ---------- */
+const ranked = DATA.players.filter(p=>p.games>=20);
+(function podium(){
+  const top=[...ranked].sort((a,b)=>b.winrate-a.winrate).slice(0,3);
+  const order=[1,0,2]; // visual: 2nd, 1st, 3rd
+  const medals=['◆ Champion','② Runner-up','③ Third'];
+  $('#podium').innerHTML = order.map(i=>{
+    const p=top[i]; if(!p)return'';
+    return `<div class="pod-card ${i===0?'p1':''}">
+      <div class="medal">${medals[i]}</div>
+      <div class="pod-name">${p.name}</div>
+      ${dial(p.winrate)}
+      <div class="pod-meta"><b>${p.wins}</b> wins / <b>${p.games}</b> games · avg finish <b>${p.avgrank}</b></div>
+    </div>`;
+  }).join('');
+})();
+
+let lbSort={k:'winrate',dir:-1};
+function renderLB(){
+  const rows=[...ranked].sort((a,b)=>{
+    let x=a[lbSort.k],y=b[lbSort.k];
+    if(typeof x==='string')return lbSort.dir*x.localeCompare(y);
+    return lbSort.dir*((x??-1)-(y??-1));
+  });
+  const maxWR=Math.max(...rows.map(r=>r.winrate));
+  $('#lbTable tbody').innerHTML = rows.map((p,i)=>{
+    const sol = p.solrate==null||p.sol_n===0 ? '<span class="muted">—</span>' : p.solrate+'%';
+    return `<tr>
+      <td><span class="rank-badge ${i===0&&lbSort.k==='winrate'&&lbSort.dir===-1?'top':''}">${i+1}</span><span class="pname">${p.name}</span></td>
+      <td>${p.games}</td>
+      <td>${p.wins}</td>
+      <td><span class="wr" style="color:${wrColor(p.winrate)}">${p.winrate}%</span></td>
+      <td class="bar-cell hide-sm"><div class="bar"><i style="width:${p.winrate/maxWR*100}%"></i></div></td>
+      <td>${p.avgrank}</td>
+      <td class="hide-sm">${sol}</td>
+    </tr>`;
+  }).join('');
+  document.querySelectorAll('#lbTable th').forEach(th=>{
+    const a=th.querySelector('.arr'); if(!a)return;
+    a.textContent = th.dataset.k===lbSort.k ? (lbSort.dir===-1?'▼':'▲') : '';
+  });
+}
+document.querySelectorAll('#lbTable th.sortable').forEach(th=>{
+  th.addEventListener('click',()=>{
+    const k=th.dataset.k;
+    if(lbSort.k===k)lbSort.dir*=-1; else lbSort={k,dir:k==='name'||k==='avgrank'?1:-1};
+    renderLB();
+  });
+});
+renderLB();
+
+/* ---------- head to head ---------- */
+(function(){
+  const ps=CORE;
+  const t=$('#h2hTable');
+  let head='<tr><th class="corner"></th>'+ps.map(p=>`<th class="colhead">${p}</th>`).join('')+'</tr>';
+  let body=ps.map(rp=>{
+    let cells=ps.map(cp=>{
+      if(rp===cp)return`<td><div class="cell self"></div></td>`;
+      const rec=DATA.h2h[rp]?.[cp];
+      if(!rec||rec.games===0)return`<td><div class="cell"><span class="nogame">—</span></div></td>`;
+      const pct=Math.round(100*rec.a_better/rec.games);
+      // color: 0%->red,50%->gold,100%->green
+      let bg = pct<50 ? mix('#3a201c','#5a4420',pct/50) : mix('#5a4420','#1f4029',(pct-50)/50);
+      let border = pct<50 ? '#6e3328' : pct>50 ? '#2f6b3e':'#5a4420';
+      return`<td><div class="cell" style="background:${bg};border-color:${border}">
+        <span class="pct" style="color:${pct<45?'#e87a68':pct>55?'#6cc77e':'#f0cd7e'}">${pct}%</span>
+        <span class="rec">${rec.a_better}–${rec.b_better}${rec.ties?'–'+rec.ties:''}</span>
+      </div></td>`;
+    }).join('');
+    return`<tr><th class="rowhead">${rp}</th>${cells}</tr>`;
+  }).join('');
+  t.innerHTML=head+body;
+})();
+
+/* ---------- commanders ---------- */
+let cmdState={sort:'games',min:1,q:''};
+function renderCmd(){
+  let list=DATA.commanders.filter(c=>c.games>=cmdState.min);
+  if(cmdState.q){const q=cmdState.q.toLowerCase();list=list.filter(c=>c.name.toLowerCase().includes(q));}
+  list.sort((a,b)=>{
+    if(cmdState.sort==='games')return b.games-a.games||b.winrate-a.winrate;
+    if(cmdState.sort==='winrate')return b.winrate-a.winrate||b.games-a.games;
+    return (a.avgrank??9)-(b.avgrank??9)||b.games-a.games;
+  });
+  $('#cmdCount').textContent = `${list.length} commanders shown`;
+  $('#cmdGrid').innerHTML = list.length? list.map(c=>{
+    const pilots=c.pilots.slice(0,4).map(p=>`<span class="pilot">${p.player} <b>${p.games}</b></span>`).join('');
+    const more=c.pilots.length>4?`<span class="pilot">+${c.pilots.length-4}</span>`:'';
+    return `<div class="cmd">
+      <div class="topline"></div>
+      <div class="cname">${c.name}</div>
+      <div class="row"><span class="k">Games</span><span class="v">${c.games}</span></div>
+      <div class="row"><span class="k">Win rate</span><span class="v" style="color:${wrColor(c.winrate)}">${c.winrate}%</span></div>
+      <div class="wrbar"><i style="width:${Math.max(c.winrate,2)}%;background:${wrColor(c.winrate)}"></i></div>
+      <div class="row"><span class="k">Avg finish</span><span class="v">${c.avgrank??'—'}</span></div>
+      <div class="pilots">${pilots}${more}</div>
+    </div>`;
+  }).join('') : `<div class="empty">No commanders match "${cmdState.q}"</div>`;
+}
+$('#cmdSort').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;
+  $('#cmdSort').querySelectorAll('button').forEach(x=>x.classList.remove('on'));b.classList.add('on');cmdState.sort=b.dataset.s;renderCmd();});
+$('#cmdMin').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;
+  $('#cmdMin').querySelectorAll('button').forEach(x=>x.classList.remove('on'));b.classList.add('on');cmdState.min=+b.dataset.m;renderCmd();});
+$('#cmdSearch').addEventListener('input',e=>{cmdState.q=e.target.value;renderCmd();});
+renderCmd();
+
+/* ---------- by player ---------- */
+const playerNames = DATA.players.filter(p=>p.games>=10).map(p=>p.name);
+let curPlayer=playerNames[0];
+$('#playerPick').innerHTML = playerNames.map((p,i)=>`<button data-p="${p}" class="${i===0?'on':''}">${p}</button>`).join('');
+function renderPlayer(){
+  const decks=DATA.playercommanders[curPlayer]||[];
+  const p=DATA.players.find(x=>x.name===curPlayer);
+  $('#playerBody').innerHTML = `
+    <div style="margin-bottom:20px;display:flex;gap:26px;flex-wrap:wrap;align-items:center">
+      <div><span style="font-family:'Oswald';font-weight:600;font-size:22px;color:var(--gold2)">${p.winrate}%</span> <span class="muted" style="font-size:13px">overall win rate</span></div>
+      <div><span style="font-family:'Oswald';font-weight:600;font-size:22px">${p.games}</span> <span class="muted" style="font-size:13px">games</span></div>
+      <div><span style="font-family:'Oswald';font-weight:600;font-size:22px">${p.avgrank}</span> <span class="muted" style="font-size:13px">avg finish</span></div>
+      <div><span style="font-family:'Oswald';font-weight:600;font-size:22px">${decks.length}</span> <span class="muted" style="font-size:13px">decks piloted</span></div>
+    </div>
+    <div class="cmd-grid pdetail-grid">${decks.map(d=>`
+      <div class="cmd"><div class="topline"></div>
+        <div class="cname">${d.commander}</div>
+        <div class="row"><span class="k">Games</span><span class="v">${d.games}</span></div>
+        <div class="row"><span class="k">Wins</span><span class="v">${d.wins}</span></div>
+        <div class="wrbar"><i style="width:${Math.max(d.winrate,2)}%;background:${wrColor(d.winrate)}"></i></div>
+        <div class="row" style="margin-bottom:0"><span class="k">Win rate / finish</span><span class="v"><span style="color:${wrColor(d.winrate)}">${d.winrate}%</span> <span class="muted" style="font-size:13px">· ${d.avgrank??'—'}</span></span></div>
+      </div>`).join('')}</div>`;
+}
+$('#playerPick').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;
+  $('#playerPick').querySelectorAll('button').forEach(x=>x.classList.remove('on'));b.classList.add('on');curPlayer=b.dataset.p;renderPlayer();});
+renderPlayer();
+</script>
+
+</body></html>
