@@ -1,12 +1,12 @@
 <!DOCTYPE html>
-<html lang="en"><head>
-<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+<html lang="en">
+<head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Commander League — Live Tracker</title>
-<link rel="preconnect" href="https://fonts.googleapis.com/">
-<link rel="preconnect" href="https://fonts.gstatic.com/" crossorigin="">
-<link href="index_files/css2.css" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@300;400;500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
 <style>
 
 :root{
@@ -229,52 +229,52 @@ footer .src{font-family:'JetBrains Mono';font-size:11px;margin-top:8px;word-brea
 <body>
 
 <div class="wrap utilbar">
-  <div class="langsel" id="langSel"><button data-l="en" class="on">EN</button><button data-l="de">DE</button><button data-l="vi">VI</button><button data-l="tr">TR</button></div>
+  <div class="langsel" id="langSel"></div>
 </div>
 
 <header>
   <div class="mana-ring"></div>
   <div class="wrap hero-inner">
-    <div class="eyebrow"><span data-i="eyebrow">Commander · EDH · Live Ledger</span> <span class="live-dot"></span></div>
-    <h1><span data-i="title1">The Pod</span><br><span class="thin" data-i="title2">Standings</span></h1>
-    <p class="sub" data-i="sub">Pulled live from the group spreadsheet — every game, commander, and finish, refreshed straight from the source.</p>
+    <div class="eyebrow"><span data-i="eyebrow"></span> <span class="live-dot"></span></div>
+    <h1><span data-i="title1"></span><br><span class="thin" data-i="title2"></span></h1>
+    <p class="sub" data-i="sub"></p>
     <div class="hero-stats" id="heroStats"></div>
   </div>
 </header>
 
 <nav><div class="wrap nav-inner" id="tabs">
-  <button class="tab active" data-v="leaderboard" data-i="tab_leaderboard">Leaderboard</button>
-  <button class="tab" data-v="h2h" data-i="tab_h2h">Head to Head</button>
-  <button class="tab" data-v="commanders" data-i="tab_commanders">Commanders</button>
-  <button class="tab" data-v="players" data-i="tab_players">By Player</button>
-  <button class="tab" data-v="length" data-i="tab_length">Game Length</button>
+  <button class="tab active" data-v="leaderboard" data-i="tab_leaderboard"></button>
+  <button class="tab" data-v="h2h" data-i="tab_h2h"></button>
+  <button class="tab" data-v="commanders" data-i="tab_commanders"></button>
+  <button class="tab" data-v="players" data-i="tab_players"></button>
+  <button class="tab" data-v="length" data-i="tab_length"></button>
   <div class="nav-right">
     <div class="yearsel" id="yearSel"></div>
     <button class="refresh" id="refreshBtn">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 12a9 9 0 1 1-2.6-6.4M21 3v6h-6"></path></svg>
-      <span data-i="refresh">Refresh</span>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 12a9 9 0 1 1-2.6-6.4M21 3v6h-6"/></svg>
+      <span data-i="refresh"></span>
     </button>
   </div>
 </div></nav>
 
 <main class="wrap">
-  <div id="loading" class="status" style="display: none;">
+  <div id="loading" class="status">
     <div class="spinner"></div>
-    <h3 data-i="loading_title">Loading games from the sheet…</h3>
-    <p data-i="loading_sub">Fetching and crunching the latest results.</p>
+    <h3 data-i="loading_title"></h3>
+    <p data-i="loading_sub"></p>
   </div>
 
-  <div id="error" class="status err" style="display: flex;">
-    <h3 data-i="err_title">Couldn't load the sheet</h3>
-    <p id="errMsg">NetworkError when attempting to fetch resource.</p>
+  <div id="error" class="status err" style="display:none">
+    <h3 data-i="err_title"></h3>
+    <p id="errMsg"></p>
     <div class="steps">
-      <b data-i="setup_title">To connect your sheet:</b>
+      <b data-i="setup_title"></b>
       <ol>
-        <li data-i="setup_1">In Google Sheets: <b>File → Share → Publish to web</b></li><li data-i="setup_2">Under "Link", choose the <b>Dataset</b> sheet and format <b>Comma-separated values (.csv)</b></li><li data-i="setup_3">Click <b>Publish</b>, copy the URL</li>
-        <li data-i="setup_4">Paste it into the <code>SHEET_CSV_URL</code> line near the top of this HTML file</li><li data-i="setup_5">Reload this page</li>
+        <li data-i="setup_1"></li><li data-i="setup_2"></li><li data-i="setup_3"></li>
+        <li data-i="setup_4"></li><li data-i="setup_5"></li>
       </ol>
     </div>
-    <button class="btn" id="retryBtn" data-i="try_again">Try again</button>
+    <button class="btn" id="retryBtn" data-i="try_again"></button>
   </div>
 
   <div id="app" style="display:none">
@@ -282,26 +282,26 @@ footer .src{font-family:'JetBrains Mono';font-size:11px;margin-top:8px;word-brea
     <div id="views">
     <section class="view active" id="leaderboard">
       <div class="podium" id="podium"></div>
-      <div class="section-head"><h2 data-i="full_standings">Full Standings</h2><span class="hint" data-i="sort_hint">Click any column to sort · win = 1st place finish</span></div>
+      <div class="section-head"><h2 data-i="full_standings"></h2><span class="hint" data-i="sort_hint"></span></div>
       <div class="panel"><table id="lbTable">
         <thead><tr>
-          <th data-k="name" class="sortable"><span data-i="th_player">Player</span> <span class="arr"></span></th>
-          <th data-k="games" class="sortable"><span data-i="th_games">Games</span> <span class="arr"></span></th>
-          <th data-k="wins" class="sortable"><span data-i="th_wins">Wins</span> <span class="arr"></span></th>
-          <th data-k="winrate" class="sortable"><span data-i="th_winrate">Win Rate</span> <span class="arr">▼</span></th>
+          <th data-k="name" class="sortable"><span data-i="th_player"></span> <span class="arr"></span></th>
+          <th data-k="games" class="sortable"><span data-i="th_games"></span> <span class="arr"></span></th>
+          <th data-k="wins" class="sortable"><span data-i="th_wins"></span> <span class="arr"></span></th>
+          <th data-k="winrate" class="sortable"><span data-i="th_winrate"></span> <span class="arr">▼</span></th>
           <th class="bar-cell hide-sm"></th>
-          <th data-k="avgrank" class="sortable"><span data-i="th_avgfinish">Avg Finish</span> <span class="arr"></span></th>
-          <th data-k="solrate" class="sortable hide-sm"><span data-i="th_solring">Sol Ring T1</span> <span class="arr"></span></th>
+          <th data-k="avgrank" class="sortable"><span data-i="th_avgfinish"></span> <span class="arr"></span></th>
+          <th data-k="solrate" class="sortable hide-sm"><span data-i="th_solring"></span> <span class="arr"></span></th>
         </tr></thead><tbody></tbody>
       </table></div>
     </section>
 
     <section class="view" id="h2h">
-      <div class="section-head"><h2 data-i="h2h_title">Head to Head</h2></div>
-      <div class="h2h-intro"><div class="ico">VS</div><div data-i="h2h_intro">Pick a player to see who they beat and who beats them — head-to-head across every game they've shared.</div></div>
+      <div class="section-head"><h2 data-i="h2h_title"></h2></div>
+      <div class="h2h-intro"><div class="ico">VS</div><div data-i="h2h_intro"></div></div>
       <div class="h2h-toggle" id="h2hToggle">
-        <button class="on" data-mode="cards" data-i="h2h_card_toggle">Rivalries</button>
-        <button data-mode="grid" data-i="h2h_grid_toggle">Full grid</button>
+        <button class="on" data-mode="cards" data-i="h2h_card_toggle"></button>
+        <button data-mode="grid" data-i="h2h_grid_toggle"></button>
       </div>
       <div class="h2h-mode on" id="h2hCards">
         <div class="h2h-playerpick" id="h2hPick"></div>
@@ -310,48 +310,46 @@ footer .src{font-family:'JetBrains Mono';font-size:11px;margin-top:8px;word-brea
       </div>
       <div class="h2h-mode" id="h2hGrid">
         <div class="panel" style="padding:20px">
-          <div class="hint" style="margin-bottom:16px;font-size:13px;color:var(--ink2)" data-i="h2h_grid_help">Each
- cell shows how often the LEFT player finishes ahead of the TOP player. 
-Green = left player wins the matchup, red = loses it.</div>
+          <div class="hint" style="margin-bottom:16px;font-size:13px;color:var(--ink2)" data-i="h2h_grid_help"></div>
           <div class="h2h-scroll"><table class="h2h" id="h2hTable"></table></div>
           <div class="legend">
-            <span><span class="sw" style="background:linear-gradient(90deg,#d6442f,#d9b25a)"></span><span data-i="h2h_losing">Losing matchups</span></span>
-            <span><span class="sw" style="background:linear-gradient(90deg,#d9b25a,#3f9b54)"></span><span data-i="h2h_winning">Winning matchups</span></span>
+            <span><span class="sw" style="background:linear-gradient(90deg,#d6442f,#d9b25a)"></span><span data-i="h2h_losing"></span></span>
+            <span><span class="sw" style="background:linear-gradient(90deg,#d9b25a,#3f9b54)"></span><span data-i="h2h_winning"></span></span>
           </div>
         </div>
       </div>
     </section>
 
     <section class="view" id="commanders">
-      <div class="section-head"><h2 data-i="cmd_title">Commander Performance</h2><span class="hint" id="cmdCount"></span></div>
+      <div class="section-head"><h2 data-i="cmd_title"></h2><span class="hint" id="cmdCount"></span></div>
       <div class="cmd-controls">
         <div class="seg" id="cmdSort">
-          <button class="on" data-s="games" data-i="cmd_mostplayed">Most Played</button>
-          <button data-s="winrate" data-i="cmd_bestwin">Best Win %</button>
-          <button data-s="avgrank" data-i="cmd_bestfinish">Best Finish</button>
+          <button class="on" data-s="games" data-i="cmd_mostplayed"></button>
+          <button data-s="winrate" data-i="cmd_bestwin"></button>
+          <button data-s="avgrank" data-i="cmd_bestfinish"></button>
         </div>
         <div class="seg" id="cmdMin">
-          <button data-m="1" class="on" data-i="cmd_all">All</button>
-          <button data-m="5" data-i="cmd_5plus">5+ games</button>
-          <button data-m="10" data-i="cmd_10plus">10+ games</button>
+          <button data-m="1" class="on" data-i="cmd_all"></button>
+          <button data-m="5" data-i="cmd_5plus"></button>
+          <button data-m="10" data-i="cmd_10plus"></button>
         </div>
-        <div class="search"><input id="cmdSearch" autocomplete="off" placeholder="Search commander…"></div>
+        <div class="search"><input id="cmdSearch" autocomplete="off"></div>
       </div>
       <div class="cmd-grid" id="cmdGrid"></div>
     </section>
 
     <section class="view" id="players">
-      <div class="section-head"><h2 data-i="players_title">By Player</h2><span class="hint" data-i="players_hint">Each pilot's decks, ranked by games played</span></div>
+      <div class="section-head"><h2 data-i="players_title"></h2><span class="hint" data-i="players_hint"></span></div>
       <div class="cmd-controls"><div class="seg" id="playerPick"></div></div>
       <div id="playerBody"></div>
     </section>
 
     <section class="view" id="length">
-      <div class="section-head"><h2 data-i="length_title">Game Length</h2><span class="hint" id="glCount"></span></div>
+      <div class="section-head"><h2 data-i="length_title"></h2><span class="hint" id="glCount"></span></div>
       <div class="gl-grid" id="glStats"></div>
       <div class="panel" style="padding:24px 26px">
-        <div style="font-family:'Oswald';font-weight:600;font-size:18px;text-transform:uppercase;margin-bottom:4px" data-i="gl_distribution">Distribution</div>
-        <div class="hint" style="color:var(--ink3);font-size:13px" data-i="gl_dist_sub">How long games actually run, in minutes</div>
+        <div style="font-family:'Oswald';font-weight:600;font-size:18px;text-transform:uppercase;margin-bottom:4px" data-i="gl_distribution"></div>
+        <div class="hint" style="color:var(--ink3);font-size:13px" data-i="gl_dist_sub"></div>
         <div class="histo" id="glHisto"></div>
       </div>
     </section>
@@ -360,7 +358,7 @@ Green = left player wins the matchup, red = loses it.</div>
 </main>
 
 <footer class="wrap">
-  <div><span data-i="foot_live">Live data</span> · <b id="footMeta">—</b></div>
+  <div><span data-i="foot_live"></span> · <b id="footMeta">—</b></div>
   <div class="src" id="footSrc"></div>
 </footer>
 
@@ -774,5 +772,5 @@ async function load(){
 load();
 
 </script>
-
-</body></html>
+</body>
+</html>
