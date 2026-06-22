@@ -505,6 +505,88 @@ footer .src{font-family:'JetBrains Mono';font-size:11px;margin-top:8px;word-brea
   .pp-two-col{grid-template-columns:1fr}
 }
 
+/* ================= COMPREHENSIVE MOBILE FIXES ================= */
+@media(max-width:680px){
+  /* Prevent any horizontal page scroll */
+  html,body{overflow-x:hidden;max-width:100%}
+  .wrap{padding:0 16px}
+
+  /* Hero controls: let them wrap so Refresh never overflows */
+  .hero-bottom{align-items:flex-start;gap:18px}
+  .hero-controls{width:100%;flex-wrap:wrap}
+  .yearsel-wrap{flex:1;min-width:0}
+  .yearsel{flex-wrap:wrap}
+  .refresh{flex-shrink:0}
+
+  /* Leaderboard: scroll the table inside the panel instead of breaking the page.
+     Keep the first column (player) generous so the tap target is clear. */
+  #leaderboard .panel{overflow-x:auto;-webkit-overflow-scrolling:touch}
+  #lbTable{min-width:340px}
+  #lbTable td,#lbTable th{padding:11px 10px;font-size:13px}
+  .lb-row{cursor:pointer}
+  /* a subtle affordance that rows are tappable */
+  .pname{position:relative}
+
+  /* Any data table scrolls within its card rather than overflowing */
+  .yoy-table,.fc-table{min-width:420px}
+  .cd-card,.panel{max-width:100%}
+  /* wrap the YoY table card + finish counts so they scroll horizontally */
+  #playerDetail .cd-card,#finishChart2,#finishChart{overflow-x:auto;-webkit-overflow-scrolling:touch}
+
+  /* Detail page headers/stats stack nicely */
+  .cd-stats{grid-template-columns:repeat(2,1fr);gap:10px}
+  .cd-stat-v{font-size:24px}
+  .cd-name{font-size:24px}
+  .cd-title-row{flex-direction:column;gap:8px}
+  .cd-grid2{grid-template-columns:1fr}
+  .cd-dm-cols{grid-template-columns:1fr;gap:18px}
+  .pp-yoy-grid{grid-template-columns:1fr}
+  .pp-two-col{grid-template-columns:1fr}
+
+  /* charts shrink to fit */
+  .trend-svg{min-width:0}
+  .vbar-chart{gap:10px;flex-wrap:nowrap}
+  .vbar-col{flex:1 1 0;min-width:0}
+  .yoy-chart{gap:10px}
+  .yoy-bar-col{min-width:0}
+
+  /* commander/player rival rows: tighten so they fit */
+  .cd-vp-name{width:60px;font-size:13px}
+  .cd-vp-rec{width:46px}
+  .cd-pilot-name{width:64px}
+
+  /* matchup detail */
+  .md-decks-grid{grid-template-columns:1fr}
+  .md-hero{flex-direction:column}
+  .md-player .bigpct{font-size:44px}
+
+  /* sol ring / finish */
+  .fd-name{width:56px;font-size:12px}
+  .sol-compare{gap:14px}
+  .sol-ring-big{width:104px;height:104px}
+  .sol-num{font-size:24px}
+
+  /* back buttons easier to hit */
+  .md-back{padding:11px 18px;font-size:14px}
+
+  /* range panel: full-width friendly */
+  .range-panel{right:auto;left:0;min-width:200px}
+
+  /* podium stacks */
+  .podium{grid-template-columns:1fr;gap:12px}
+  .pod-card.p1{transform:none}
+  .pod-card.p1.pod-clickable:hover{transform:none}
+  h1{font-size:44px}
+  .hero-stats{gap:20px}
+}
+
+/* very narrow phones */
+@media(max-width:400px){
+  .cd-stats{grid-template-columns:repeat(2,1fr)}
+  .tab{padding:8px 12px;font-size:14px}
+  .yearsel button{padding:6px 10px;font-size:12px}
+}
+
 </style>
 </head>
 <body>
