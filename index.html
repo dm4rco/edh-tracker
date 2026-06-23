@@ -9,6 +9,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@300;400;500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
 <style>
 
+
 :root{
   --felt:#0d1410; --felt2:#121e18; --panel:#16241d; --panel2:#1b2c23;
   --line:#2a4035; --line2:#37574a;
@@ -71,7 +72,7 @@ nav{position:sticky;top:0;z-index:50;background:rgba(13,20,16,.82);backdrop-filt
 
 main{padding:34px 0 80px}
 #leaderboard{padding-top:14px}
-.view{display:none;animation:fade .35s ease}
+.view{display:none;animation:fade .35s ease;padding-bottom:48px}
 .view.active{display:block}
 @keyframes fade{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
 .section-head{display:flex;align-items:baseline;justify-content:space-between;gap:16px;margin-bottom:22px;flex-wrap:wrap}
@@ -249,7 +250,7 @@ footer .src{font-family:'JetBrains Mono';font-size:11px;margin-top:8px;word-brea
 
 /* ===== MATCHUP DETAIL PAGE ===== */
 #matchupDetail{display:none}
-#matchupDetail.on{display:block;animation:fade .35s ease;padding:14px 0 8px}
+#matchupDetail.on{display:block;animation:fade .35s ease;padding:14px 0 48px}
 .md-back{display:inline-flex;align-items:center;gap:8px;font-family:'Oswald';font-weight:500;text-transform:uppercase;font-size:14px;letter-spacing:.03em;color:var(--ink2);background:var(--panel);border:1px solid var(--line);padding:9px 16px;border-radius:9px;cursor:pointer;margin-bottom:22px;transition:.15s}
 .md-back:hover{color:var(--ink);border-color:var(--line2)}
 .md-back svg{width:15px;height:15px}
@@ -378,7 +379,7 @@ footer .src{font-family:'JetBrains Mono';font-size:11px;margin-top:8px;word-brea
 
 /* ===== COMMANDER DETAIL PAGE ===== */
 #commanderDetail{display:none}
-#commanderDetail.on{display:block;animation:fade .35s ease;padding:14px 0 8px}
+#commanderDetail.on{display:block;animation:fade .35s ease;padding:14px 0 48px}
 .cd-header{position:relative;background:linear-gradient(165deg,var(--panel2),var(--panel));border:1px solid var(--line);border-radius:var(--radius);padding:24px;overflow:hidden;margin-bottom:18px}
 .cd-topline{position:absolute;top:0;left:0;right:0;height:4px}
 .cd-title-row{display:flex;align-items:baseline;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:20px}
@@ -467,7 +468,7 @@ footer .src{font-family:'JetBrains Mono';font-size:11px;margin-top:8px;word-brea
 
 /* ===== PLAYER DETAIL PAGE ===== */
 #playerDetail{display:none}
-#playerDetail.on{display:block;animation:fade .35s ease;padding:14px 0 8px}
+#playerDetail.on{display:block;animation:fade .35s ease;padding:14px 0 48px}
 
 /* clickable leaderboard rows + podium */
 .lb-row{cursor:pointer}
@@ -586,6 +587,7 @@ footer .src{font-family:'JetBrains Mono';font-size:11px;margin-top:8px;word-brea
   .tab{padding:8px 12px;font-size:14px}
   .yearsel button{padding:6px 10px;font-size:12px}
 }
+
 
 </style>
 </head>
@@ -768,6 +770,7 @@ footer .src{font-family:'JetBrains Mono';font-size:11px;margin-top:8px;word-brea
 </footer>
 
 <script>
+
 
 /* ===== PRODUCTION BUILD — pulls live from the published Google Sheet CSV ===== */
 const SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSp1Q2FyeSV-x74Q9u44BZGbTSMwZVcB1518mQtoigTag9Zv37CJj2w1C2JJtrIPERuzU62dwUGmw3M/pub?gid=358959286&single=true&output=csv";
@@ -1539,10 +1542,11 @@ function renderPlayerDetail(){
     const plotW=W-padL-padR, plotH=H-padT-padB;
     const n=trend.months.length;
     const xAt=i=> padL+(n<=1?plotW/2:(i/(n-1))*plotW);
-    const yAt=v=> padT+(1-v/100)*plotH;
+    const axP=niceAxis(trend.series.filter(v=>v!=null));
+    const yAt=v=> padT+(1-(v-axP.lo)/(axP.hi-axP.lo))*plotH;
     let grid='';
-    [0,25,50,75,100].forEach(v=>{const y=yAt(v);
-      grid+=`<line x1="${padL}" y1="${y}" x2="${W-padR}" y2="${y}" stroke="var(--line)" stroke-width="1" ${v===0?'':'stroke-dasharray="2 4"'}/>`;
+    axP.ticks.forEach(v=>{const y=yAt(v);
+      grid+=`<line x1="${padL}" y1="${y}" x2="${W-padR}" y2="${y}" stroke="var(--line)" stroke-width="1" ${v===axP.lo?'':'stroke-dasharray="2 4"'}/>`;
       grid+=`<text x="${padL-7}" y="${y+4}" text-anchor="end" fill="var(--ink3)" font-size="10" font-family="JetBrains Mono">${v}%</text>`;});
     let xl='';const step=Math.max(1,Math.ceil(n/6));
     for(let i=0;i<n;i+=step){const m=trend.months[i];const[y,mo]=m.split('-');
@@ -1679,6 +1683,32 @@ function computePlayerTrend(playerName){
 }
 
 /* ===== chart data computations (use current year subset) ===== */
+
+/* Compute a tidy y-axis range from the actual plotted values so the chart
+   fills the vertical space instead of always spanning 0-100%. Returns
+   {lo, hi, ticks:[...]} with gridlines at nice round numbers. */
+function niceAxis(values){
+  const vals = values.filter(v=>v!=null && !isNaN(v));
+  if(!vals.length) return {lo:0, hi:100, ticks:[0,25,50,75,100]};
+  let mn=Math.min(...vals), mx=Math.max(...vals);
+  if(mn===mx){ mn=Math.max(0,mn-10); mx=Math.min(100,mx+10); } // flat line -> give it room
+  const span=mx-mn;
+  const pad=Math.max(4, span*0.15);            // ~15% headroom each side
+  let lo=Math.max(0, mn-pad);
+  let hi=Math.min(100, mx+pad);
+  // round outward to a clean step
+  const step = span<=20 ? 5 : 10;
+  lo=Math.floor(lo/step)*step;
+  hi=Math.ceil(hi/step)*step;
+  if(hi-lo<step) hi=lo+step;                    // guarantee at least one interval
+  if(hi>100) hi=100;
+  if(lo<0) lo=0;
+  // build ticks
+  const ticks=[];
+  for(let v=lo; v<=hi+0.001; v+=step) ticks.push(Math.round(v));
+  return {lo, hi, ticks};
+}
+
 const PLAYER_COLORS = ['#d9b25a','#3f9b54','#3a7bd5','#d6442f','#7a5b8c','#c98a3a','#5bbf8a'];
 // Stable color per player: assigned once from the full all-time roster (sorted by total
 // games desc) so a player's color never changes when the year/date filter changes.
@@ -1778,13 +1808,15 @@ function renderTrends(){
   const plotW=W-padL-padR, plotH=H-padT-padB;
   const n=data.months.length;
   const xAt=i=> padL + (n<=1?plotW/2:(i/(n-1))*plotW);
-  const yAt=v=> padT + (1-v/100)*plotH;
+  // auto-scale the y-axis to the data so lines fill the chart
+  const allVals=[]; data.players.forEach(p=>data.series[p].forEach(v=>{ if(v!=null) allVals.push(v); }));
+  const ax=niceAxis(allVals);
+  const yAt=v=> padT + (1-(v-ax.lo)/(ax.hi-ax.lo))*plotH;
 
-  // gridlines at 0,25,50,75,100
   let grid='';
-  [0,25,50,75,100].forEach(v=>{
+  ax.ticks.forEach(v=>{
     const y=yAt(v);
-    grid+=`<line x1="${padL}" y1="${y}" x2="${W-padR}" y2="${y}" stroke="var(--line)" stroke-width="1" ${v===0?'':'stroke-dasharray="2 4"'}/>`;
+    grid+=`<line x1="${padL}" y1="${y}" x2="${W-padR}" y2="${y}" stroke="var(--line)" stroke-width="1" ${v===ax.lo?'':'stroke-dasharray="2 4"'}/>`;
     grid+=`<text x="${padL-8}" y="${y+4}" text-anchor="end" fill="var(--ink3)" font-size="11" font-family="JetBrains Mono">${v}%</text>`;
   });
 
@@ -2238,6 +2270,7 @@ async function load(){
 }
 
 load();
+
 
 </script>
 </body>
