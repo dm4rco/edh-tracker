@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Blizzard Rentner — Commander League Tracker</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%23f0cd7e'/%3E%3Cstop offset='1' stop-color='%23d9b25a'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='32' height='32' rx='8' fill='%230b110d'/%3E%3Crect x='2' y='2' width='28' height='28' rx='7' fill='url(%23g)'/%3E%3Ctext x='16' y='22' font-family='Georgia,serif' font-weight='700' font-size='15' text-anchor='middle' fill='%231a1207'%3EBR%3C/text%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@300;400;500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
@@ -317,6 +318,20 @@ tbody tr:hover{background:rgba(217,178,90,.06)}
 .h2h-playerpick button{font-family:'Oswald';font-weight:500;font-size:15px;text-transform:uppercase;letter-spacing:.02em;color:var(--ink2);background:var(--panel);border:1px solid var(--line);padding:9px 18px;border-radius:10px;cursor:pointer;transition:.15s}
 .h2h-playerpick button:hover{border-color:var(--line2);color:var(--ink)}
 .h2h-playerpick button.on{background:var(--gold);color:var(--gold-ink);border-color:var(--gold)}
+.h2h-pick-row{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:20px}
+.h2h-pick-row .h2h-playerpick{margin-bottom:0}
+.h2h-profile-link{font-family:'Oswald';font-weight:500;font-size:12.5px;text-transform:uppercase;letter-spacing:.04em;color:var(--gold2);display:inline-flex;align-items:center;gap:5px;cursor:pointer;white-space:nowrap;transition:.15s}
+.h2h-profile-link:hover{color:var(--gold)}
+.h2h-profile-link svg{width:13px;height:13px;flex-shrink:0}
+
+/* ============ PLAYER CARDS (compare) ============ */
+.pcard-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(252px,1fr));gap:16px;margin-bottom:8px}
+.pcard{cursor:pointer}
+.pcard.themed>*{position:relative;z-index:1}
+.pcard.themed>.pod-accent{z-index:2}
+.pcard.themed>.pod-tint{z-index:0}
+.pcard .cname{cursor:pointer}
+.pcard .row .v.wr{font-family:'Oswald';font-weight:600}
 .rival-hero{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:22px}
 .rival-stat{background:linear-gradient(165deg,var(--panel2),var(--panel));border:1px solid var(--line);border-radius:var(--radius);padding:17px}
 .rival-stat .lbl{font-size:10.5px;color:var(--ink3);text-transform:uppercase;letter-spacing:.1em;margin-bottom:9px}
@@ -647,6 +662,27 @@ tbody tr:hover{background:rgba(217,178,90,.06)}
 .md-pair-row .presult{font-family:'Oswald';font-weight:600;font-size:15px;white-space:nowrap}
 .md-pair-row .pgames{font-family:'JetBrains Mono';font-size:11px;color:var(--ink3);white-space:nowrap}
 
+/* recent form / streak / extra stats on Matchup Detail */
+.md-form{background:linear-gradient(180deg,var(--panel),var(--bg2));border:1px solid var(--line);border-radius:var(--radius);padding:18px 20px;box-shadow:var(--shadow);margin-bottom:22px}
+.md-form .ph{padding:0 0 14px}
+.md-form-strip{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:14px}
+.md-chip{width:32px;height:32px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-family:'Oswald';font-weight:700;font-size:12px;letter-spacing:.02em;border:1px solid;cursor:default;flex-shrink:0}
+.md-chip.res-a{background:rgba(74,169,99,.14);border-color:var(--win);color:var(--win)}
+.md-chip.res-b{background:rgba(217,90,68,.14);border-color:var(--lose);color:var(--lose)}
+.md-chip.res-tie{background:rgba(217,178,90,.14);border-color:var(--gold);color:var(--gold)}
+.md-streak-line{font-size:14px;color:var(--ink2)}
+.md-streak-line b{color:var(--gold2)}
+.md-streak-best{font-size:12.5px;color:var(--ink3);margin-top:6px}
+.md-extra{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:22px}
+.md-extra-card{background:linear-gradient(165deg,var(--panel2),var(--panel));border:1px solid var(--line);border-radius:var(--radius);padding:16px 18px}
+.md-extra-card .mek{font-size:11px;color:var(--ink3);text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px;display:block}
+.md-extra-card .mev{display:flex;align-items:stretch;justify-content:space-between;gap:10px}
+.md-extra-card .mev-half{flex:1;text-align:center}
+.md-extra-card .mev-half .who{font-family:'Oswald';font-weight:600;font-size:12.5px;color:var(--ink2);text-transform:uppercase;letter-spacing:.02em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.md-extra-card .mev-half .num{font-family:'Oswald';font-weight:700;font-size:23px;margin-top:4px}
+.md-extra-card .mev-div{width:1px;background:var(--line);align-self:stretch}
+@media(max-width:640px){.md-extra{grid-template-columns:1fr}}
+
 /* ============ SEARCH OVERLAY ============ */
 .search-overlay{position:fixed;inset:0;z-index:300;background:rgba(6,10,8,.72);backdrop-filter:blur(6px);display:none;align-items:flex-start;justify-content:center;padding:12vh 20px 20px}
 .search-overlay.on{display:flex;animation:fade .16s ease}
@@ -946,9 +982,21 @@ main{padding:36px 0 150px}
     <!-- ================= PLAYERS ================= -->
     <section class="view" id="v-players">
       <nav class="subnav" data-spy="v-players">
-        <a class="snav on" data-target="sec-h2h" data-i="h2h_title"></a>
-        <a class="snav" data-target="sec-cmp" data-i="cmp_title"></a>
+        <a class="snav on" data-target="sec-cmp" data-i="cmp_title"></a>
+        <a class="snav" data-target="sec-h2h" data-i="h2h_title"></a>
       </nav>
+
+      <div class="sec" id="sec-cmp">
+        <div class="section-head"><h2 data-i="cmp_title"></h2></div>
+        <div class="hint" style="margin:-8px 0 20px;font-size:13px;color:var(--ink3)" data-i="cmp_sub"></div>
+
+        <div class="section-head" style="margin-bottom:14px"><h2 style="font-size:19px" data-i="cmp_cards_title"></h2><span class="hint" data-i="cmp_cards_sub"></span></div>
+        <div class="pcard-grid" id="pcardGrid"></div>
+
+        <div class="section-head" style="margin-top:34px"><h2 style="font-size:19px" data-i="cmp_table_title"></h2><span class="ti-badge" data-i="scope_ind"></span></div>
+        <div class="cmp-controls" id="cmpControls"></div>
+        <div id="cmpBody"></div>
+      </div>
 
       <div class="sec" id="sec-h2h">
         <div class="section-head"><h2 data-i="h2h_title"></h2></div>
@@ -959,7 +1007,10 @@ main{padding:36px 0 150px}
         </div>
         <div class="rec-explain"><span class="ic">?</span><span class="txt" data-i="rec_explain"></span></div>
         <div class="h2h-mode on" id="h2hCards">
-          <div class="h2h-playerpick" id="h2hPick"></div>
+          <div class="h2h-pick-row">
+            <div class="h2h-playerpick" id="h2hPick"></div>
+            <a class="h2h-profile-link" id="h2hProfileLink" role="button" tabindex="0"></a>
+          </div>
           <div class="rival-hero" id="rivalHero"></div>
           <div class="h2h-dig-hint"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 18l6-6-6-6"/></svg><span data-i="h2h_dig"></span></div>
           <div class="matchup-list" id="matchupList"></div>
@@ -974,13 +1025,6 @@ main{padding:36px 0 150px}
             </div>
           </div>
         </div>
-      </div>
-
-      <div class="sec" id="sec-cmp">
-        <div class="section-head"><h2 data-i="cmp_title"></h2><span class="ti-badge" data-i="scope_ind"></span></div>
-        <div class="hint" style="margin:-8px 0 16px;font-size:13px;color:var(--ink3)" data-i="cmp_sub"></div>
-        <div class="cmp-controls" id="cmpControls"></div>
-        <div id="cmpBody"></div>
       </div>
     </section>
 
@@ -1174,7 +1218,7 @@ function colorsCsvUrl(){
   // reuse the exact base of SHEET_CSV_URL, just swap the gid
   return SHEET_CSV_URL.replace(/gid=\d+/, 'gid='+COLORS_GID);
 }
-const I18N = {"en": {"_label": "EN", "_name": "English", "eyebrow": "Commander · EDH · Live Ledger", "title1": "Blizzard", "title2": "Rentner", "sub": "Pulled live from the group spreadsheet — every game, commander, and finish, refreshed straight from the source.", "games_logged": "Games logged", "seats_played": "Seats played", "commanders": "Commanders", "span": "Span", "tab_leaderboard": "Leaderboard", "tab_h2h": "Head to Head", "tab_commanders": "Commanders", "tab_players": "By Player", "tab_length": "Game Length", "refresh": "Refresh", "loading_title": "Loading games from the sheet…", "loading_sub": "Fetching and crunching the latest results.", "err_title": "Couldn't load the sheet", "setup_title": "To connect your sheet:", "setup_1": "In Google Sheets: <b>File → Share → Publish to web</b>", "setup_2": "Under \"Link\", choose the <b>Dataset</b> sheet and format <b>Comma-separated values (.csv)</b>", "setup_3": "Click <b>Publish</b>, copy the URL", "setup_4": "Paste it into the <code>SHEET_CSV_URL</code> line near the top of this HTML file", "setup_5": "Reload this page", "try_again": "Try again", "full_standings": "Full Standings", "sort_hint": "Click any column to sort · win = 1st place finish", "th_player": "Player", "th_games": "Games", "th_wins": "Wins", "th_winrate": "Win Rate", "th_avgfinish": "Avg Finish", "th_solring": "Early Sol Ring", "champion": "Champion", "runnerup": "Runner-up", "third": "Third", "wins_label": "wins", "games_label": "games", "winrate_label": "win rate", "avgfinish_label": "avg finish", "h2h_title": "Head to Head", "h2h_intro": "Pick a player to see who they beat and who beats them — head-to-head across every game they've shared.", "h2h_pick": "Showing rivalries for", "h2h_vs": "vs", "h2h_beats": "finishes ahead of", "h2h_loses": "finishes behind", "h2h_record": "record", "h2h_shared": "shared games", "h2h_winning": "Winning matchups", "h2h_losing": "Losing matchups", "h2h_even": "Even", "h2h_best": "Best matchup", "h2h_worst": "Toughest rival", "h2h_most": "Most played against", "h2h_ahead_pct": "ahead", "h2h_summary": "In {games} shared games, {a} finished ahead of {b} {pct}% of the time.", "h2h_no_games": "no shared games", "h2h_grid_toggle": "Full grid", "h2h_card_toggle": "Rivalries", "h2h_grid_help": "Each cell shows how often the LEFT player finishes ahead of the TOP player. Green = left player wins the matchup, red = loses it.", "h2h_row_ahead": "ahead of column", "times": "times", "cmd_title": "Commander Performance", "cmd_shown": "{n} commanders shown", "cmd_mostplayed": "Most Played", "cmd_bestwin": "Best Win %", "cmd_bestfinish": "Best Finish", "cmd_all": "All", "cmd_5plus": "5+ games", "cmd_10plus": "10+ games", "cmd_search": "Search commander…", "cmd_games": "Games", "cmd_winrate": "Win rate", "cmd_avgfinish": "Avg finish", "cmd_nomatch": "No commanders match \"{q}\"", "players_title": "By Player", "players_hint": "Each pilot's decks, ranked by games played", "overall_winrate": "overall win rate", "decks_piloted": "decks piloted", "pc_games": "Games", "pc_wins": "Wins", "pc_wr_finish": "Win rate / finish", "pc_avgtime": "Avg time", "length_title": "Game Length", "length_count": "{n} games with time logged", "gl_average": "Average", "gl_median": "Median", "gl_shortest": "Shortest", "gl_longest": "Longest", "gl_distribution": "Distribution", "gl_dist_sub": "How long games actually run, in minutes", "gl_none": "No game-time data found in the sheet.", "year_all": "All Time", "year_label": "Year", "foot_live": "Live data", "min_games_note": "players with 20+ games ranked", "no_year_data": "No games recorded for {year}.", "cmd_custom": "Custom", "cmd_custom_ph": "min games", "h2h_dig": "Tap a rival for the deck-by-deck breakdown", "md_title": "Matchup Breakdown", "md_back": "Back to rivalries", "md_overall": "Overall head-to-head", "md_when": "When they share a table", "md_a_decks": "{name}'s decks in this matchup", "md_b_decks": "{name}'s decks in this matchup", "md_deck_duels": "Deck vs deck duels", "md_deck_duels_sub": "Specific commander pairings when both were seated together", "md_ahead": "ahead", "md_behind": "behind", "md_vs": "vs", "md_games_short": "g", "md_no_data": "No shared games between these two players{yr}.", "md_finishes_ahead": "finishes ahead", "md_record_in": "in {n} shared games", "md_pick_rival": "Choose a rival to break down", "th_deck": "Deck", "th_rec": "Record (ahead–behind)", "th_wr": "Ahead %", "rec_explain_title": "Reading the records", "rec_explain": "Records show <b>ahead–behind</b> (e.g. <b>8–3</b> = finished ahead 8 times, behind 3). When games tied on finishing position, a third number is added: <b>ahead–behind–tied</b> (e.g. <b>15–9–4</b>).", "tab_trends": "Trends", "tab_other": "Other", "tab_compare": "Compare", "cmp_title": "Player Comparison", "cmp_sub": "Every player side by side, all-time and year by year — pick a metric", "cmp_none": "No player data yet.", "cmt_help": "Each tag goes to the one player at the extreme for that period. To keep small samples from skewing it, a player needs 30+ games for the all-time column and 15+ for a single year. A dash means nobody qualified. Timed-game tags (Slowpoke/Speedrunner) only appear where games had times logged. Wallflower is the exception — it lists everyone who ended the period without a title.", "cmt_tag_col": "Tag", "cmp_m_winrate": "Win Rate", "cmp_m_games": "Games", "cmp_m_avg": "Avg Finish", "cmp_m_podium": "Podium %", "cmp_m_sol": "Sol Ring %", "cmp_m_seat": "Avg Seat", "cmp_m_topCmd": "Top Commander", "cmp_m_topColor": "Top Color", "cmp_m_help_winrate": "Win rate (% of games finished 1st). Best per column is underlined.", "cmp_m_help_games": "Games played. Best per column is underlined.", "cmp_m_help_avg": "Average finishing position (lower is better). Best per column is underlined.", "cmp_m_help_podium": "Share of games finished in the top 2. Best per column is underlined.", "cmp_m_help_sol": "How often they land an early Sol Ring. Best per column is underlined.", "cmp_m_help_seat": "Average seat (turn order) they played from — just for context, no 'best'.", "cmp_m_help_topCmd": "Their most-played commander in each period, with how many games.", "cmp_m_help_topColor": "Their most-played color in each period, with how many games.", "tag_endboss": "Endboss", "tag_endboss_d": "Highest win rate — the one everyone's gunning for", "tag_badluck": "Bad Luck", "tag_badluck_d": "Lowest win rate — the dice have been cruel", "tag_grinder": "Grinder", "tag_grinder_d": "Most games played — always at the table", "tag_podium": "Podium Regular", "tag_podium_d": "Most top-2 finishes", "tag_solking": "Sol Ring King", "tag_solking_d": "Lands an early Sol Ring more than anyone", "tag_brewer": "Brewer", "tag_brewer_d": "Most distinct commanders — always trying something new", "tag_onetrick": "One-Trick", "tag_onetrick_d": "Most games on a single deck — knows what works", "tag_slowpoke": "Slowpoke", "tag_slowpoke_d": "Plays in the longest games on average", "tag_speed": "Speedrunner", "tag_speed_d": "Plays in the fastest games on average", "tag_streaker": "Hot Hand", "tag_streaker_d": "Longest win streak ever recorded", "tag_rentner": "Rentner", "tag_rentner_d": "Longest losing streak — pension's coming any day now", "tag_onfire": "On Fire", "tag_onfire_d": "Currently on the longest active win streak", "tag_deco": "Wallflower", "tag_deco_d": "No standout tag this time — just here looking good", "tag_bench": "On the Bench", "tag_bench_d": "Fewest games — always the sub, rarely subbed in", "trends_title": "Win Rate Over Time", "trends_sub": "How each player's form has shifted across the months", "trend_rolling": "Rolling form", "trend_career": "Career average", "trend_rolling_hint": "Last {n} games — shows hot and cold streaks", "trend_career_hint": "Cumulative win rate — converges to each player's long-run level", "trend_no_data": "Not enough dated games to chart a trend.", "finish_title": "Finishing Positions", "finish_sub": "How often each player lands in each seat — the shape of consistency", "finish_1st": "1st", "finish_2nd": "2nd", "finish_3rd": "3rd", "finish_4th": "4th", "finish_legend": "Each bar is one player's games split by finishing position", "other_turn_title": "Does Turn Order Matter?", "other_turn_sub": "Win rate by seat position — turn 1 goes first", "other_turn_seat": "Seat", "other_turn_note": "Across {n} games. Going first {verdict}.", "other_turn_helps": "tends to help", "other_turn_hurts": "shows a disadvantage", "other_turn_neutral": "is roughly neutral", "other_sol_title": "The Sol Ring Effect", "other_sol_sub": "Win rate when a player drops an early Sol Ring vs when they don't", "other_sol_with": "With Early Sol Ring", "other_sol_without": "Without", "other_sol_lift": "That's a {pts}-point swing", "other_sol_rate": "Early Sol Ring lands in {pct}% of all games played", "other_finish_title": "Finish Counts", "other_finish_sub": "Exact tallies of where each player lands — click a column to sort", "chart_winrate": "Win rate", "chart_games": "games", "chart_of_games": "of games", "fc_player": "Player", "fc_games": "Games", "fc_1st": "1st", "fc_2nd": "2nd", "fc_3rd": "3rd", "fc_4th": "4th", "fc_podium": "Podium %", "fc_podium_hint": "top-2 finishes", "streak_title": "Streaks & Droughts", "streak_sub": "Longest runs of consecutive wins, and longest dry spells without one", "streak_best_win": "Best win run", "streak_best_dry": "Longest drought", "streak_cur_win": "On a {n}-win run", "streak_cur_dry": "{n} without a win", "streak_none": "Not enough games yet.", "div_title": "Commander Diversity", "div_sub": "One-trick specialists vs restless brewers", "div_decks": "decks", "div_eff": "effective", "div_top": "top deck", "div_brewer": "Brewer", "div_trick": "One-trick", "div_note": "\"Effective\" decks = how many decks a player really spreads across, weighting by how often each is played (a perplexity score) — higher means more variety. \"Top deck\" = the share of their games on their single most-played commander; a high % means they lean on one deck.", "div_none": "Not enough games yet.", "parity_title": "Pod Parity Over Time", "parity_sub": "Spread of win rates across players — a shrinking line means a more balanced pod", "parity_note": "Compared to earlier, the pod is {verdict}.", "parity_steady": "holding steady", "parity_closer": "getting closer", "parity_wider": "spreading apart", "parity_none": "Not enough dated games to chart parity.", "cd_back": "Back to commanders", "cd_title": "Commander Profile", "cd_games": "Games", "cd_winrate": "Win rate", "cd_avgfinish": "Avg finish", "cd_pilots": "Pilots", "cd_piloted_by": "Piloted by", "cd_vs_players": "Against each player", "cd_vs_players_sub": "How this commander finishes versus each opponent at the table", "cd_best_vs": "Beats", "cd_worst_vs": "Struggles against", "cd_finish_spread": "Finish spread", "cd_deck_matchups": "Deck matchups", "cd_deck_matchups_sub": "Best and worst results against specific opposing commanders ({min}+ games)", "cd_ahead": "ahead", "cd_behind": "behind", "cd_of": "of", "cd_in_games": "in {n} games", "cd_no_matchups": "Not enough repeated deck matchups yet to show reliable results.", "cd_by_pilot": "By pilot", "cd_click_hint": "Click a commander card to see its full profile", "cd_vs": "vs", "cd_pilot_wr": "win rate", "cd_best_matchup": "Best matchup", "cd_worst_matchup": "Toughest matchup", "cd_most_faced": "Faced most", "cd_seat": "avg seat", "cd_solrate": "Early Sol Ring", "year_custom": "Custom", "date_from": "From", "date_to": "To", "date_apply": "Apply", "date_clear": "Clear", "date_range_label": "Date range", "date_all_months": "All", "pp_back": "Back to leaderboard", "pp_title": "Player Profile", "pp_games": "Games", "pp_winrate": "Win rate", "pp_avgfinish": "Avg finish", "pp_decks": "Decks", "pp_yoy": "Year on Year", "pp_yoy_sub": "How this player's results have changed each year", "pp_yoy_year": "Year", "pp_yoy_games": "Games", "pp_yoy_wins": "Wins", "pp_yoy_wr": "Win %", "pp_yoy_avg": "Avg finish", "pp_yoy_podium": "Podium %", "pp_trend": "Win Rate Over Time", "pp_trend_sub": "Last {n} games", "pp_finish": "Finish Spread", "pp_rivals": "Rivalries", "pp_rivals_sub": "Record against each opponent — click to dig in", "pp_best_rival": "Best matchup", "pp_worst_rival": "Toughest rival", "pp_seat": "Seat Performance", "pp_seat_sub": "Win rate by turn order", "pp_decks_title": "Decks Piloted", "pp_decks_sub": "Ranked by games played — click for the full commander profile", "pp_decks_sort_games": "Most played", "pp_decks_sort_winrate": "Win rate", "pp_decks_sort_time": "Avg time", "pp_best_deck": "Best deck", "pp_worst_deck": "Weakest deck", "pp_solring": "Early Sol Ring", "pp_best_seat": "Best seat", "ppsol_title": "Sol Ring Impact", "ppsol_sub": "Win rate when they land an early Sol Ring vs when they don't", "ppsol_with": "With Early Sol Ring", "ppsol_without": "Without", "ppsol_swing": "point swing", "ppsol_rate": "Lands an early Sol Ring in {pct}% of their games", "pp_ahead": "ahead", "pp_click_player": "Click a player to see their full profile", "pp_no_year": "No games this period.", "pp_seat_label": "Seat", "pp_overall": "overall", "tab_recent": "Recent Games", "rg_title": "Recent Games", "rg_sub": "The latest matches — newest first", "rg_game": "Game", "rg_min": "min", "rg_no_time": "no time logged", "rg_load_more": "Load more", "rg_showing": "Showing {n} of {total}", "rg_winner": "Winner", "rg_none": "No games to show.", "rg_players_lbl": "Players", "rg_pfilter_tip": "Toggle a player to hide or show every game they sat in", "rg_window_lbl": "Window size", "rg_win_all": "All", "rg_win_custom_ph": "custom", "rg_focus_all": "Showing all {n} games", "rg_focus_window": "Games {from}–{to} of {total} (newest = 1)", "rg_trend_title": "Finishing Positions", "rg_trend_sub": "How each player finished across these {n} games", "rg_trend_none": "Not enough games to chart yet.", "rg_click_hint": "Click any player or commander to see their full profile", "rg_seat": "seat", "rg_sol": "Early Sol Ring", "pace_title": "Commander Pace", "pace_sub": "Which commanders show up in fast games vs slow ones", "pace_help": "Average length of games each commander appeared in, compared to the overall average ({avg}m). Negative = games tend to run faster when this commander is at the table; positive = slower. Based on timed games only.", "pace_fastest": "Fastest tables", "pace_slowest": "Slowest tables", "pace_faster": "faster", "pace_slower": "slower", "pace_avg": "avg game", "pace_games": "timed games", "pace_none": "No timed games to analyse.", "pace_min_note": "Commanders with {min}+ timed games", "pace_vs_avg": "vs average", "color_W": "White", "color_U": "Blue", "color_B": "Black", "color_R": "Red", "color_G": "Green", "color_C": "Colorless", "cs_title": "Color Breakdown", "cs_sub": "How the pod's commander colors perform — respects the year filter above", "cs_bycolor_title": "Win Rate by Color", "cs_bycolor_sub": "Each seat counts toward every color in its commander's identity", "cs_bycount_title": "Mono vs Multicolor", "cs_bycount_sub": "Does adding colors help? Win rate by number of colors", "cs_count_1": "1 (Mono)", "cs_count_2": "2 colors", "cs_count_3": "3 colors", "cs_count_4": "4 colors", "cs_count_5": "5 colors", "cs_seats": "seats", "cs_none": "No color data for these games yet.", "cs_expected": "For reference, an average seat wins ~{n}% in a 4-player game.", "cs_games_short": "g", "pcolor_title": "Color Profile", "pcolor_sub": "Which colors this player gravitates to, and how they do in them", "pcolor_fav": "Favorite color", "pcolor_least": "Least played", "pcolor_most_combo": "Go-to combination", "pcolor_least_combo": "Rarest combination", "pcolor_by_color": "Games by Color", "pcolor_by_color_sub": "Each deck counts toward every color in its identity", "pcolor_combos": "Color Combinations", "pcolor_combos_sub": "Exact identities piloted ({n} distinct)", "pcolor_of_games": "of games", "pcolor_more": "more", "pcolor_by_color_sub2": "Share of this player's games each color appears in, and win rate", "pcolor_combos_sub2": "Share of games by exact identity ({n} distinct) · bar shows the full split", "pcolor_weight": "Color Weight", "pcolor_weight_sub": "Overall color mix — each game split evenly across its colors (sums to 100%)", "cmp_m_tags": "Tags", "cmp_m_help_tags": "Who held each superlative — all-time and year by year. Independent of the year filter above.", "nav_overview": "Overview", "nav_games": "Games", "nav_players": "Players", "nav_insights": "Insights", "hl_lastgame": "Last game", "fin_view_chart": "Chart", "fin_view_table": "Table", "search_ph": "Search players & commanders…", "search_none": "No matches for \"{q}\"", "search_tip": "Press / anywhere to search", "scope_ind": "All-time & year by year — independent of the time scope", "rg_pfilter_scope": "With a player filter active, the list searches the entire history — beyond the selected time scope — so the window can always fill.", "scope_label": "Time scope", "menu_more": "More", "gw_title": "Game Window", "gw_sub": "Pick who's at the table and slide through history — everything on this page follows this window", "games_ind": "Entire history — independent of the time scope", "tag_guest": "Guest", "tag_guest_d": "Fewer than 15 games in this period — not enough to earn a title", "iw_sub": "Focus every chart below on the most recent games — within the current time scope. Leave it on All for the full picture.", "iw_focus": "Last {n} of {total} games in scope", "iw_focus_all": "All {n} games in scope"}};
+const I18N = {"en": {"_label": "EN", "_name": "English", "eyebrow": "Commander · EDH · Live Ledger", "title1": "Blizzard", "title2": "Rentner", "sub": "Pulled live from the group spreadsheet — every game, commander, and finish, refreshed straight from the source.", "games_logged": "Games logged", "seats_played": "Seats played", "commanders": "Commanders", "span": "Span", "tab_leaderboard": "Leaderboard", "tab_h2h": "Head to Head", "tab_commanders": "Commanders", "tab_players": "By Player", "tab_length": "Game Length", "refresh": "Refresh", "loading_title": "Loading games from the sheet…", "loading_sub": "Fetching and crunching the latest results.", "err_title": "Couldn't load the sheet", "setup_title": "To connect your sheet:", "setup_1": "In Google Sheets: <b>File → Share → Publish to web</b>", "setup_2": "Under \"Link\", choose the <b>Dataset</b> sheet and format <b>Comma-separated values (.csv)</b>", "setup_3": "Click <b>Publish</b>, copy the URL", "setup_4": "Paste it into the <code>SHEET_CSV_URL</code> line near the top of this HTML file", "setup_5": "Reload this page", "try_again": "Try again", "full_standings": "Full Standings", "sort_hint": "Click any column to sort · win = 1st place finish", "th_player": "Player", "th_games": "Games", "th_wins": "Wins", "th_winrate": "Win Rate", "th_avgfinish": "Avg Finish", "th_solring": "Early Sol Ring", "champion": "Champion", "runnerup": "Runner-up", "third": "Third", "wins_label": "wins", "games_label": "games", "winrate_label": "win rate", "avgfinish_label": "avg finish", "h2h_title": "Head to Head", "h2h_intro": "Pick a player to see who they beat and who beats them — head-to-head across every game they've shared.", "h2h_pick": "Showing rivalries for", "h2h_vs": "vs", "h2h_beats": "finishes ahead of", "h2h_loses": "finishes behind", "h2h_record": "record", "h2h_shared": "shared games", "h2h_winning": "Winning matchups", "h2h_losing": "Losing matchups", "h2h_even": "Even", "h2h_best": "Best matchup", "h2h_worst": "Toughest rival", "h2h_most": "Most played against", "h2h_ahead_pct": "ahead", "h2h_summary": "In {games} shared games, {a} finished ahead of {b} {pct}% of the time.", "h2h_no_games": "no shared games", "h2h_grid_toggle": "Full grid", "h2h_card_toggle": "Rivalries", "h2h_grid_help": "Each cell shows how often the LEFT player finishes ahead of the TOP player. Green = left player wins the matchup, red = loses it.", "h2h_row_ahead": "ahead of column", "times": "times", "cmd_title": "Commander Performance", "cmd_shown": "{n} commanders shown", "cmd_mostplayed": "Most Played", "cmd_bestwin": "Best Win %", "cmd_bestfinish": "Best Finish", "cmd_all": "All", "cmd_5plus": "5+ games", "cmd_10plus": "10+ games", "cmd_search": "Search commander…", "cmd_games": "Games", "cmd_winrate": "Win rate", "cmd_avgfinish": "Avg finish", "cmd_nomatch": "No commanders match \"{q}\"", "players_title": "By Player", "players_hint": "Each pilot's decks, ranked by games played", "overall_winrate": "overall win rate", "decks_piloted": "decks piloted", "pc_games": "Games", "pc_wins": "Wins", "pc_wr_finish": "Win rate / finish", "pc_avgtime": "Avg time", "length_title": "Game Length", "length_count": "{n} games with time logged", "gl_average": "Average", "gl_median": "Median", "gl_shortest": "Shortest", "gl_longest": "Longest", "gl_distribution": "Distribution", "gl_dist_sub": "How long games actually run, in minutes", "gl_none": "No game-time data found in the sheet.", "year_all": "All Time", "year_label": "Year", "foot_live": "Live data", "min_games_note": "players with 20+ games ranked", "no_year_data": "No games recorded for {year}.", "cmd_custom": "Custom", "cmd_custom_ph": "min games", "h2h_dig": "Tap a rival for the deck-by-deck breakdown", "h2h_view_profile": "View {name}'s full profile", "md_title": "Matchup Breakdown", "md_back": "Back to rivalries", "md_overall": "Overall head-to-head", "md_when": "When they share a table", "md_a_decks": "{name}'s decks in this matchup", "md_b_decks": "{name}'s decks in this matchup", "md_deck_duels": "Deck vs deck duels", "md_deck_duels_sub": "Specific commander pairings when both were seated together", "md_ahead": "ahead", "md_behind": "behind", "md_vs": "vs", "md_games_short": "g", "md_no_data": "No shared games between these two players{yr}.", "md_finishes_ahead": "finishes ahead", "md_record_in": "in {n} shared games", "md_pick_rival": "Choose a rival to break down", "md_form_title": "Recent Form", "md_form_sub": "Last {n} shared games, oldest → newest", "md_streak_line": "{name} has finished ahead in {n} meetings running.", "md_no_streak": "No active streak right now — their most recent meeting didn't extend one.", "md_streak_best": "Longest streak this matchup: {a} {an} · {b} {bn}", "md_avgfinish_label": "Avg Finish (this matchup)", "md_solring_label": "Early Sol Ring (this matchup)", "th_deck": "Deck", "th_rec": "Record (ahead–behind)", "th_wr": "Ahead %", "rec_explain_title": "Reading the records", "rec_explain": "Records show <b>ahead–behind</b> (e.g. <b>8–3</b> = finished ahead 8 times, behind 3). When games tied on finishing position, a third number is added: <b>ahead–behind–tied</b> (e.g. <b>15–9–4</b>).", "tab_trends": "Trends", "tab_other": "Other", "tab_compare": "Compare", "cmp_title": "Player Comparison", "cmp_sub": "Every player side by side, all-time and year by year — pick a metric", "cmp_none": "No player data yet.", "cmp_cards_title": "All Players", "cmp_cards_sub": "Everyone's stat line at a glance, for the current time scope — click a card for the full profile", "cmp_table_title": "Compare By Year", "cmt_help": "Each tag goes to the one player at the extreme for that period. To keep small samples from skewing it, a player needs 30+ games for the all-time column and 15+ for a single year. A dash means nobody qualified. Timed-game tags (Slowpoke/Speedrunner) only appear where games had times logged. Wallflower is the exception — it lists everyone who ended the period without a title.", "cmt_tag_col": "Tag", "cmp_m_winrate": "Win Rate", "cmp_m_games": "Games", "cmp_m_avg": "Avg Finish", "cmp_m_podium": "Podium %", "cmp_m_sol": "Sol Ring %", "cmp_m_seat": "Avg Seat", "cmp_m_avgtime": "Avg Game Time", "cmp_m_deckcount": "Decks Piloted", "cmp_m_topCmd": "Top Commander", "cmp_m_topColor": "Top Color", "cmp_m_help_winrate": "Win rate (% of games finished 1st). Best per column is underlined.", "cmp_m_help_games": "Games played. Best per column is underlined.", "cmp_m_help_avg": "Average finishing position (lower is better). Best per column is underlined.", "cmp_m_help_podium": "Share of games finished in the top 2. Best per column is underlined.", "cmp_m_help_sol": "How often they land an early Sol Ring. Best per column is underlined.", "cmp_m_help_seat": "Average seat (turn order) they played from — just for context, no 'best'.", "cmp_m_help_avgtime": "Average length of games they played in, in minutes — just for context, no 'best'.", "cmp_m_help_deckcount": "How many distinct commanders they've piloted. Best per column is underlined.", "cmp_m_help_topCmd": "Their most-played commander in each period, with how many games.", "cmp_m_help_topColor": "Their most-played color in each period, with how many games.", "tag_endboss": "Endboss", "tag_endboss_d": "Highest win rate — the one everyone's gunning for", "tag_badluck": "Bad Luck", "tag_badluck_d": "Lowest win rate — the dice have been cruel", "tag_grinder": "Grinder", "tag_grinder_d": "Most games played — always at the table", "tag_podium": "Podium Regular", "tag_podium_d": "Most top-2 finishes", "tag_solking": "Sol Ring King", "tag_solking_d": "Lands an early Sol Ring more than anyone", "tag_brewer": "Brewer", "tag_brewer_d": "Most distinct commanders — always trying something new", "tag_onetrick": "One-Trick", "tag_onetrick_d": "Most games on a single deck — knows what works", "tag_slowpoke": "Slowpoke", "tag_slowpoke_d": "Plays in the longest games on average", "tag_speed": "Speedrunner", "tag_speed_d": "Plays in the fastest games on average", "tag_streaker": "Hot Hand", "tag_streaker_d": "Longest win streak ever recorded", "tag_rentner": "Rentner", "tag_rentner_d": "Longest losing streak — pension's coming any day now", "tag_onfire": "On Fire", "tag_onfire_d": "Currently on the longest active win streak", "tag_deco": "Wallflower", "tag_deco_d": "No standout tag this time — just here looking good", "tag_bench": "On the Bench", "tag_bench_d": "Fewest games — always the sub, rarely subbed in", "trends_title": "Win Rate Over Time", "trends_sub": "How each player's form has shifted across the months", "trend_rolling": "Rolling form", "trend_career": "Career average", "trend_rolling_hint": "Last {n} games — shows hot and cold streaks", "trend_career_hint": "Cumulative win rate — converges to each player's long-run level", "trend_no_data": "Not enough dated games to chart a trend.", "finish_title": "Finishing Positions", "finish_sub": "How often each player lands in each seat — the shape of consistency", "finish_1st": "1st", "finish_2nd": "2nd", "finish_3rd": "3rd", "finish_4th": "4th", "finish_legend": "Each bar is one player's games split by finishing position", "other_turn_title": "Does Turn Order Matter?", "other_turn_sub": "Win rate by seat position — turn 1 goes first", "other_turn_seat": "Seat", "other_turn_note": "Across {n} games. Going first {verdict}.", "other_turn_helps": "tends to help", "other_turn_hurts": "shows a disadvantage", "other_turn_neutral": "is roughly neutral", "other_sol_title": "The Sol Ring Effect", "other_sol_sub": "Win rate when a player drops an early Sol Ring vs when they don't", "other_sol_with": "With Early Sol Ring", "other_sol_without": "Without", "other_sol_lift": "That's a {pts}-point swing", "other_sol_rate": "Early Sol Ring lands in {pct}% of all games played", "other_finish_title": "Finish Counts", "other_finish_sub": "Exact tallies of where each player lands — click a column to sort", "chart_winrate": "Win rate", "chart_games": "games", "chart_of_games": "of games", "fc_player": "Player", "fc_games": "Games", "fc_1st": "1st", "fc_2nd": "2nd", "fc_3rd": "3rd", "fc_4th": "4th", "fc_podium": "Podium %", "fc_podium_hint": "top-2 finishes", "streak_title": "Streaks & Droughts", "streak_sub": "Longest runs of consecutive wins, and longest dry spells without one", "streak_best_win": "Best win run", "streak_best_dry": "Longest drought", "streak_cur_win": "On a {n}-win run", "streak_cur_dry": "{n} without a win", "streak_none": "Not enough games yet.", "div_title": "Commander Diversity", "div_sub": "One-trick specialists vs restless brewers", "div_decks": "decks", "div_eff": "effective", "div_top": "top deck", "div_brewer": "Brewer", "div_trick": "One-trick", "div_note": "\"Effective\" decks = how many decks a player really spreads across, weighting by how often each is played (a perplexity score) — higher means more variety. \"Top deck\" = the share of their games on their single most-played commander; a high % means they lean on one deck.", "div_none": "Not enough games yet.", "parity_title": "Pod Parity Over Time", "parity_sub": "Spread of win rates across players — a shrinking line means a more balanced pod", "parity_note": "Compared to earlier, the pod is {verdict}.", "parity_steady": "holding steady", "parity_closer": "getting closer", "parity_wider": "spreading apart", "parity_none": "Not enough dated games to chart parity.", "cd_back": "Back to commanders", "cd_title": "Commander Profile", "cd_games": "Games", "cd_winrate": "Win rate", "cd_avgfinish": "Avg finish", "cd_pilots": "Pilots", "cd_piloted_by": "Piloted by", "cd_vs_players": "Against each player", "cd_vs_players_sub": "How this commander finishes versus each opponent at the table", "cd_best_vs": "Beats", "cd_worst_vs": "Struggles against", "cd_finish_spread": "Finish spread", "cd_deck_matchups": "Deck matchups", "cd_deck_matchups_sub": "Best and worst results against specific opposing commanders ({min}+ games)", "cd_ahead": "ahead", "cd_behind": "behind", "cd_of": "of", "cd_in_games": "in {n} games", "cd_no_matchups": "Not enough repeated deck matchups yet to show reliable results.", "cd_by_pilot": "By pilot", "cd_click_hint": "Click a commander card to see its full profile", "cd_vs": "vs", "cd_pilot_wr": "win rate", "cd_best_matchup": "Best matchup", "cd_worst_matchup": "Toughest matchup", "cd_most_faced": "Faced most", "cd_seat": "avg seat", "cd_solrate": "Early Sol Ring", "year_custom": "Custom", "date_from": "From", "date_to": "To", "date_apply": "Apply", "date_clear": "Clear", "date_range_label": "Date range", "date_all_months": "All", "pp_back": "Back to leaderboard", "pp_title": "Player Profile", "pp_games": "Games", "pp_winrate": "Win rate", "pp_avgfinish": "Avg finish", "pp_decks": "Decks", "pp_yoy": "Year on Year", "pp_yoy_sub": "How this player's results have changed each year", "pp_yoy_year": "Year", "pp_yoy_games": "Games", "pp_yoy_wins": "Wins", "pp_yoy_wr": "Win %", "pp_yoy_avg": "Avg finish", "pp_yoy_podium": "Podium %", "pp_trend": "Win Rate Over Time", "pp_trend_sub": "Last {n} games", "pp_finish": "Finish Spread", "pp_rivals": "Rivalries", "pp_rivals_sub": "Record against each opponent — click to dig in", "pp_best_rival": "Best matchup", "pp_worst_rival": "Toughest rival", "pp_seat": "Seat Performance", "pp_seat_sub": "Win rate by turn order", "pp_decks_title": "Decks Piloted", "pp_decks_sub": "Ranked by games played — click for the full commander profile", "pp_decks_sort_games": "Most played", "pp_decks_sort_winrate": "Win rate", "pp_decks_sort_time": "Avg time", "pp_best_deck": "Best deck", "pp_worst_deck": "Weakest deck", "pp_solring": "Early Sol Ring", "pp_best_seat": "Best seat", "ppsol_title": "Sol Ring Impact", "ppsol_sub": "Win rate when they land an early Sol Ring vs when they don't", "ppsol_with": "With Early Sol Ring", "ppsol_without": "Without", "ppsol_swing": "point swing", "ppsol_rate": "Lands an early Sol Ring in {pct}% of their games", "pp_ahead": "ahead", "pp_click_player": "Click a player to see their full profile", "pp_no_year": "No games this period.", "pp_seat_label": "Seat", "pp_overall": "overall", "tab_recent": "Recent Games", "rg_title": "Recent Games", "rg_sub": "The latest matches — newest first", "rg_game": "Game", "rg_min": "min", "rg_no_time": "no time logged", "rg_load_more": "Load more", "rg_showing": "Showing {n} of {total}", "rg_winner": "Winner", "rg_none": "No games to show.", "rg_players_lbl": "Players", "rg_pfilter_tip": "Toggle a player to hide or show every game they sat in", "rg_window_lbl": "Window size", "rg_win_all": "All", "rg_win_custom_ph": "custom", "rg_focus_all": "Showing all {n} games", "rg_focus_window": "Games {from}–{to} of {total} (newest = 1)", "rg_trend_title": "Finishing Positions", "rg_trend_sub": "How each player finished across these {n} games", "rg_trend_none": "Not enough games to chart yet.", "rg_click_hint": "Click any player or commander to see their full profile", "rg_seat": "seat", "rg_sol": "Early Sol Ring", "pace_title": "Commander Pace", "pace_sub": "Which commanders show up in fast games vs slow ones", "pace_help": "Average length of games each commander appeared in, compared to the overall average ({avg}m). Negative = games tend to run faster when this commander is at the table; positive = slower. Based on timed games only.", "pace_fastest": "Fastest tables", "pace_slowest": "Slowest tables", "pace_faster": "faster", "pace_slower": "slower", "pace_avg": "avg game", "pace_games": "timed games", "pace_none": "No timed games to analyse.", "pace_min_note": "Commanders with {min}+ timed games", "pace_vs_avg": "vs average", "color_W": "White", "color_U": "Blue", "color_B": "Black", "color_R": "Red", "color_G": "Green", "color_C": "Colorless", "cs_title": "Color Breakdown", "cs_sub": "How the pod's commander colors perform — respects the year filter above", "cs_bycolor_title": "Win Rate by Color", "cs_bycolor_sub": "Each seat counts toward every color in its commander's identity", "cs_bycount_title": "Mono vs Multicolor", "cs_bycount_sub": "Does adding colors help? Win rate by number of colors", "cs_count_1": "1 (Mono)", "cs_count_2": "2 colors", "cs_count_3": "3 colors", "cs_count_4": "4 colors", "cs_count_5": "5 colors", "cs_seats": "seats", "cs_none": "No color data for these games yet.", "cs_expected": "For reference, an average seat wins ~{n}% in a 4-player game.", "cs_games_short": "g", "pcolor_title": "Color Profile", "pcolor_sub": "Which colors this player gravitates to, and how they do in them", "pcolor_fav": "Favorite color", "pcolor_least": "Least played", "pcolor_most_combo": "Go-to combination", "pcolor_least_combo": "Rarest combination", "pcolor_by_color": "Games by Color", "pcolor_by_color_sub": "Each deck counts toward every color in its identity", "pcolor_combos": "Color Combinations", "pcolor_combos_sub": "Exact identities piloted ({n} distinct)", "pcolor_of_games": "of games", "pcolor_more": "more", "pcolor_by_color_sub2": "Share of this player's games each color appears in, and win rate", "pcolor_combos_sub2": "Share of games by exact identity ({n} distinct) · bar shows the full split", "pcolor_weight": "Color Weight", "pcolor_weight_sub": "Overall color mix — each game split evenly across its colors (sums to 100%)", "cmp_m_tags": "Tags", "cmp_m_help_tags": "Who held each superlative — all-time and year by year. Independent of the year filter above.", "nav_overview": "Overview", "nav_games": "Games", "nav_players": "Players", "nav_insights": "Insights", "hl_lastgame": "Last game", "fin_view_chart": "Chart", "fin_view_table": "Table", "search_ph": "Search players & commanders…", "search_none": "No matches for \"{q}\"", "search_tip": "Press / anywhere to search", "scope_ind": "All-time & year by year — independent of the time scope", "rg_pfilter_scope": "With a player filter active, the list searches the entire history — beyond the selected time scope — so the window can always fill.", "scope_label": "Time scope", "menu_more": "More", "gw_title": "Game Window", "gw_sub": "Pick who's at the table and slide through history — everything on this page follows this window", "games_ind": "Entire history — independent of the time scope", "tag_guest": "Guest", "tag_guest_d": "Fewer than 15 games in this period — not enough to earn a title", "iw_sub": "Focus every chart below on the most recent games — within the current time scope. Leave it on All for the full picture.", "iw_focus": "Last {n} of {total} games in scope", "iw_focus_all": "All {n} games in scope"}};
 const DEFAULT_YEAR = "2026";
 const lang = 'en';
 
@@ -1427,9 +1471,12 @@ function computeStats(games){
   const P={},H={},C={},PC={};
   for(const g of games){
     for(const s of g.seats){
-      const p=P[s.player]||(P[s.player]={name:s.player,games:0,wins:0,rs:0,rn:0,sol:0,soln:0});
+      const p=P[s.player]||(P[s.player]={name:s.player,games:0,wins:0,rs:0,rn:0,sol:0,soln:0,pod:0,gt:0,gtn:0,decks:{}});
       p.games++;if(s.rank===1)p.wins++;p.rs+=s.rank;p.rn++;
+      if(s.rank<=2)p.pod++;
       if(s.sol!=null){p.soln++;if(s.sol===1)p.sol++;}
+      if(g.gametime!=null){p.gt+=g.gametime;p.gtn++;}
+      p.decks[s.commander]=(p.decks[s.commander]||0)+1;
       const c=C[s.commander]||(C[s.commander]={name:s.commander,games:0,wins:0,rs:0,rn:0,pilots:{}});
       c.games++;if(s.rank===1)c.wins++;c.rs+=s.rank;c.rn++;c.pilots[s.player]=(c.pilots[s.player]||0)+1;
       const key=s.player+'||'+s.commander;
@@ -1446,7 +1493,10 @@ function computeStats(games){
   const players=Object.values(P).map(p=>({name:p.name,games:p.games,wins:p.wins,
     winrate:p.games?+(100*p.wins/p.games).toFixed(1):0,
     avgrank:p.rn?+(p.rs/p.rn).toFixed(2):null,
-    solrate:p.soln?+(100*p.sol/p.soln).toFixed(1):null,soln:p.soln}))
+    solrate:p.soln?+(100*p.sol/p.soln).toFixed(1):null,soln:p.soln,
+    podium:p.games?+(100*p.pod/p.games).toFixed(0):0,
+    avgtime:p.gtn?Math.round(p.gt/p.gtn):null,
+    deckcount:Object.keys(p.decks).length}))
     .sort((a,b)=>b.winrate-a.winrate||b.games-a.games);
   const commanders=Object.values(C).map(c=>({name:c.name,games:c.games,wins:c.wins,
     winrate:c.games?+(100*c.wins/c.games).toFixed(1):0,
@@ -1609,6 +1659,12 @@ function renderH2H(){
   // player pick buttons
   if(!h2hPlayer||!CORE.includes(h2hPlayer))h2hPlayer=CORE[0];
   $('#h2hPick').innerHTML=CORE.map(p=>`<button data-p="${p}" class="${p===h2hPlayer?'on':''}">${p}</button>`).join('');
+  const profLink=$('#h2hProfileLink');
+  if(profLink){
+    profLink.innerHTML=`${t('h2h_view_profile',{name:h2hPlayer})} <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 18l6-6-6-6"/></svg>`;
+    profLink.onclick=()=>openPlayerDetail(h2hPlayer);
+    profLink.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();openPlayerDetail(h2hPlayer);}};
+  }
   renderRivalries();
   renderH2HGrid();
   // mode visibility
@@ -3223,20 +3279,21 @@ function computeCompare(){
   const cols=['all',...years];   // an "All-time" column plus each year
   // accumulator: player -> colKey -> bucket
   const acc={};
-  const blank=()=>({g:0,w:0,rs:0,rn:0,sol:0,soln:0,seat:0,seatn:0,pod:0,
+  const blank=()=>({g:0,w:0,rs:0,rn:0,sol:0,soln:0,seat:0,seatn:0,pod:0,gt:0,gtn:0,
     cmd:{},color:{}});
-  function bump(pl,key,s){
+  function bump(pl,key,s,gametime){
     const P=acc[pl]||(acc[pl]={}); const b=P[key]||(P[key]=blank());
     b.g++; if(s.rank===1)b.w++; b.rs+=s.rank; b.rn++;
     if(s.rank<=2)b.pod++;
     if(s.sol!=null){b.soln++; if(s.sol===1)b.sol++;}
     if(s.turn){b.seat+=s.turn; b.seatn++;}
+    if(gametime!=null){b.gt+=gametime; b.gtn++;}
     b.cmd[s.commander]=(b.cmd[s.commander]||0)+1;
     commanderColors(s.commander).forEach(c=>{ b.color[c]=(b.color[c]||0)+1; });
   }
   for(const g of games){
     const yr=g.date&&g.date.slice(0,4);
-    for(const s of g.seats){ bump(s.player,'all',s); if(yr) bump(s.player,yr,s); }
+    for(const s of g.seats){ bump(s.player,'all',s,g.gametime); if(yr) bump(s.player,yr,s,g.gametime); }
   }
   const topKey=obj=>{ const e=Object.entries(obj); if(!e.length) return null;
     e.sort((a,b)=>b[1]-a[1]); return {k:e[0][0], n:e[0][1]}; };
@@ -3249,6 +3306,8 @@ function computeCompare(){
       podium:+(100*b.pod/b.g).toFixed(0),
       sol: b.soln? +(100*b.sol/b.soln).toFixed(0):null,
       seat: b.seatn? +(b.seat/b.seatn).toFixed(2):null,
+      avgtime: b.gtn? Math.round(b.gt/b.gtn):null,
+      deckcount: Object.keys(b.cmd).length,
       topCmd: topKey(b.cmd),
       topColor: topKey(b.color)
     };
@@ -3270,6 +3329,8 @@ const CMP_METRICS=[
   {k:'podium',  fmt:v=>v==null?'—':v+'%', hi:'max'},
   {k:'sol',     fmt:v=>v==null?'—':v+'%', hi:'max'},
   {k:'seat',    fmt:v=>v==null?'—':v, hi:null},
+  {k:'avgtime', fmt:v=>v==null?'—':v+'m', hi:null},
+  {k:'deckcount',fmt:v=>v==null?'—':v, hi:'max'},
   {k:'topCmd',  special:'cmd'},
   {k:'topColor',special:'color'},
   {k:'tags',    special:'tags'}
@@ -3283,7 +3344,41 @@ function renderCompareControls(){
   if(seg) seg.addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;
     cmpMetric=b.dataset.m; renderCompare();});
 }
+/* ===== Players tab: at-a-glance card grid (respects the active year/date filter,
+   unlike the all-time Compare table below it) ===== */
+function renderPlayerCards(){
+  const host=$('#pcardGrid'); if(!host) return;
+  const rows=[...(S.players||[])].sort((a,b)=>b.games-a.games||b.winrate-a.winrate);
+  if(!rows.length){ host.innerHTML=`<div class="empty">${t('cmp_none')}</div>`; return; }
+  host.innerHTML=rows.map(p=>{
+    const favCols=playerFavoriteCombo(p.name);
+    const accent=colorAccentBar(favCols);
+    const tint=colorHeaderTint(favCols);
+    const accentBar = accent ? `<div class="pod-accent" style="background:${accent}"></div>` : '';
+    const tintLayer = tint ? `<div class="pod-tint" style="background:${tint}"></div>` : '';
+    const favPip = favCols.length ? colorPipsFromArr(favCols,11) : '';
+    const sol = p.solrate==null ? '<span class="muted">—</span>' : p.solrate+'%';
+    const time = p.avgtime==null ? '<span class="muted">—</span>' : p.avgtime+'m';
+    return`<div class="cmd cmd-clickable pcard${favCols.length?' themed':''}" data-player="${p.name.replace(/"/g,'&quot;')}">${accentBar}${tintLayer}
+      <div class="cname-row"><div class="cname">${p.name}${favPip?` <span class="pod-fav">${favPip}</span>`:''}</div></div>
+      ${renderTagChips(p.name,3)}
+      <div class="row"><span class="k">${t('th_games')}</span><span class="v">${p.games}</span></div>
+      <div class="row"><span class="k">${t('th_winrate')}</span><span class="v wr" style="color:${wrColor(p.winrate)}">${p.winrate}%</span></div>
+      <div class="wrbar"><i style="width:${Math.max(p.winrate,2)}%;background:${wrColor(p.winrate)}"></i></div>
+      <div class="row"><span class="k">${t('th_avgfinish')}</span><span class="v">${p.avgrank??'—'}</span></div>
+      <div class="row"><span class="k">${t('fc_podium')}</span><span class="v">${p.podium}%</span></div>
+      <div class="row"><span class="k">${t('th_solring')}</span><span class="v">${sol}</span></div>
+      <div class="row"><span class="k">${t('pc_avgtime')}</span><span class="v">${time}</span></div>
+      <div class="row"><span class="k">${t('pp_decks')}</span><span class="v">${p.deckcount}</span></div>
+    </div>`;
+  }).join('');
+  host.querySelectorAll('.pcard[data-player]').forEach(el=>{
+    el.addEventListener('click',()=>openPlayerDetail(el.getAttribute('data-player')));
+  });
+}
+
 function renderCompare(){
+  renderPlayerCards();
   renderCompareControls();
   const host=$('#cmpBody'); if(!host) return;
 
@@ -3670,15 +3765,27 @@ function renderParity(){
 
 /* ===== matchup detail (deck-by-deck) ===== */
 function computeMatchupDetail(pA, pB){
-  const games = gamesForYear();
+  const raw = gamesForYear();
+  // chronological order (same convention as computeStreaksForGames): shared meetings
+  // only make sense as a "recent form" / "streak" story when walked oldest → newest.
+  const games = raw.slice().sort((x,y)=>{
+    const dx=x.date||'', dy=y.date||''; if(dx!==dy) return dx<dy?-1:1; return (x.order||0)-(y.order||0);
+  });
   const hh={games:0,aAhead:0,bAhead:0,ties:0};
   const cmdPairs={}, aCmds={}, bCmds={};
+  const meetings=[]; // chronological log of every shared game, for form/streak/timeline
+  let aRs=0,bRs=0,aSolN=0,aSol=0,bSolN=0,bSol=0;
   for(const g of games){
     const sa=g.seats.find(s=>s.player===pA);
     const sb=g.seats.find(s=>s.player===pB);
     if(!sa||!sb) continue;
     hh.games++;
-    if(sa.rank<sb.rank)hh.aAhead++; else if(sa.rank>sb.rank)hh.bAhead++; else hh.ties++;
+    const result = sa.rank<sb.rank?'a' : sa.rank>sb.rank?'b' : 'tie';
+    if(result==='a')hh.aAhead++; else if(result==='b')hh.bAhead++; else hh.ties++;
+    aRs+=sa.rank; bRs+=sb.rank;
+    if(sa.sol!=null){aSolN++; if(sa.sol===1)aSol++;}
+    if(sb.sol!=null){bSolN++; if(sb.sol===1)bSol++;}
+    meetings.push({date:g.date,num:g.num,result,aRank:sa.rank,bRank:sb.rank,aCmd:sa.commander,bCmd:sb.commander});
     const key=sa.commander+'|||'+sb.commander;
     const cp=cmdPairs[key]||(cmdPairs[key]={aCmd:sa.commander,bCmd:sb.commander,games:0,aAhead:0,bAhead:0,ties:0});
     cp.games++; if(sa.rank<sb.rank)cp.aAhead++; else if(sa.rank>sb.rank)cp.bAhead++; else cp.ties++;
@@ -3687,8 +3794,26 @@ function computeMatchupDetail(pA, pB){
     const bc=bCmds[sb.commander]||(bCmds[sb.commander]={cmd:sb.commander,games:0,ahead:0,behind:0,ties:0});
     bc.games++; if(sb.rank<sa.rank)bc.ahead++; else if(sb.rank>sa.rank)bc.behind++; else bc.ties++;
   }
+  // longest-ever run each side has been ahead, plus whichever run is currently active (trailing)
+  let bestA=0,bestB=0,curA=0,curB=0;
+  meetings.forEach(m=>{
+    if(m.result==='a'){curA++;curB=0;if(curA>bestA)bestA=curA;}
+    else if(m.result==='b'){curB++;curA=0;if(curB>bestB)bestB=curB;}
+    else{curA=0;curB=0;}
+  });
+  let streak=null;
+  if(meetings.length){
+    const last=meetings[meetings.length-1].result;
+    if(last==='a')streak={who:'a',n:curA};
+    else if(last==='b')streak={who:'b',n:curB};
+  }
   return {
     hh,
+    meetings,
+    recent: meetings.slice(-10),
+    streak, bestStreak:{a:bestA,b:bestB},
+    avgRank:{a:hh.games?+(aRs/hh.games).toFixed(2):null, b:hh.games?+(bRs/hh.games).toFixed(2):null},
+    sol:{a:aSolN?Math.round(100*aSol/aSolN):null, b:bSolN?Math.round(100*bSol/bSolN):null},
     cmdPairs:Object.values(cmdPairs).sort((a,b)=>b.games-a.games||(b.aAhead-b.bAhead)-(a.aAhead-a.bAhead)),
     aCmds:Object.values(aCmds).sort((a,b)=>b.games-a.games),
     bCmds:Object.values(bCmds).sort((a,b)=>b.games-a.games)
@@ -3732,6 +3857,22 @@ function renderMatchupDetail(){
     }).join('');
   }
 
+  const formChips=d.recent.map(m=>{
+    const cls = m.result==='a'?'res-a':m.result==='b'?'res-b':'res-tie';
+    const lbl = m.result==='a'?'A':m.result==='b'?'B':'T';
+    const dateStr = m.date ? monthLabel(m.date.slice(0,7)) : '';
+    const title = `${dateStr ? dateStr+' — ' : ''}${esc(a)} #${m.aRank} · ${esc(b)} #${m.bRank}`;
+    return `<div class="md-chip ${cls}" title="${title}">${lbl}</div>`;
+  }).join('');
+  let streakLine;
+  if(d.streak && d.streak.n>=2){
+    const who = d.streak.who==='a'?a:b;
+    streakLine = t('md_streak_line',{name:`<b>${esc(who)}</b>`,n:d.streak.n});
+  } else {
+    streakLine = t('md_no_streak');
+  }
+  const bestStreakLine = t('md_streak_best',{a:esc(a),an:d.bestStreak.a,b:esc(b),bn:d.bestStreak.b});
+
   const pairRows=d.cmdPairs.map(cp=>{
     const verdict = cp.aAhead>cp.bAhead ? `${a} ${t('md_ahead')}` : cp.bAhead>cp.aAhead ? `${b} ${t('md_ahead')}` : t('h2h_even');
     const vcol = cp.aAhead>cp.bAhead ? 'var(--win)' : cp.bAhead>cp.aAhead ? 'var(--lose)' : 'var(--gold)';
@@ -3771,6 +3912,30 @@ function renderMatchupDetail(){
       </div>
     </div>
     <div class="md-summary-line">${t('h2h_summary',{games:d.hh.games,a:`<b>${a}</b>`,b:`<b>${b}</b>`,pct:aPct})}</div>
+    <div class="md-form">
+      <div class="ph"><div class="t">${t('md_form_title')}</div><div class="s">${t('md_form_sub',{n:d.recent.length})}</div></div>
+      <div class="md-form-strip">${formChips}</div>
+      <div class="md-streak-line">${streakLine}</div>
+      <div class="md-streak-best">${bestStreakLine}</div>
+    </div>
+    <div class="md-extra">
+      <div class="md-extra-card">
+        <span class="mek">${t('md_avgfinish_label')}</span>
+        <div class="mev">
+          <div class="mev-half"><div class="who">${a}</div><div class="num">${d.avgRank.a??'—'}</div></div>
+          <div class="mev-div"></div>
+          <div class="mev-half"><div class="who">${b}</div><div class="num">${d.avgRank.b??'—'}</div></div>
+        </div>
+      </div>
+      <div class="md-extra-card">
+        <span class="mek">${t('md_solring_label')}</span>
+        <div class="mev">
+          <div class="mev-half"><div class="who">${a}</div><div class="num">${d.sol.a!=null?d.sol.a+'%':'—'}</div></div>
+          <div class="mev-div"></div>
+          <div class="mev-half"><div class="who">${b}</div><div class="num">${d.sol.b!=null?d.sol.b+'%':'—'}</div></div>
+        </div>
+      </div>
+    </div>
     <div class="md-decks-grid">
       <div class="md-deck-col">
         <div class="colhd"><span class="dot" style="background:${aCol}"></span>${t('md_a_decks',{name:a})}</div>
