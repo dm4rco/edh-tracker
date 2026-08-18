@@ -4385,11 +4385,12 @@ const TAG_MIN_ALLTIME=30;   // ~ enough to clear occasional guests all-time
 const TAG_MIN_YEAR=15;      // per-year floor: real for a regular, out of reach for a guest
 const TAG_MATRIX_ORDER=['tag_endboss','tag_badluck','tag_grinder','tag_bench',
   'tag_podium','tag_solking','tag_brewer','tag_onetrick','tag_slowpoke','tag_speed',
-  'tag_streaker','tag_rentner','tag_onfire','tag_deco'];
+  'tag_streaker','tag_rentner','tag_executioner','tag_onfire','tag_deco'];
 const TAG_CLS={tag_endboss:'endboss',tag_badluck:'badluck',tag_grinder:'grinder',
   tag_bench:'bench',tag_podium:'podium',tag_solking:'solking',tag_brewer:'brewer',
   tag_onetrick:'onetrick',tag_slowpoke:'slowpoke',tag_speed:'speed',
-  tag_streaker:'streaker',tag_rentner:'rentner',tag_onfire:'onfire',tag_deco:'deco'};
+  tag_streaker:'streaker',tag_rentner:'rentner',tag_executioner:'executioner',
+  tag_onfire:'onfire',tag_deco:'deco'};
 function computeTagMatrix(){
   const games=(ALL_GAMES||[]).slice();
   const years=[...new Set(games.map(g=>g.date&&g.date.slice(0,4)).filter(Boolean))].sort();
