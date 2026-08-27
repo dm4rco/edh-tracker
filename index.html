@@ -3196,7 +3196,14 @@ function computeCommanderNews(cmdName){
     lastSeenDate[me.player]=g.date;
   });
 
+  // Sorted chronologically by the game each event is about (newest first), not grouped by
+  // event type — same fix, and same reasoning, as Recent Impact's sort above: grouping by type
+  // read oddly out of order once every event carried its own date. Type/weight is now only a
+  // same-day tiebreaker.
   events.sort((a,b)=>{
+    const da=a.date||'', db=b.date||'';
+    if(da!==db) return da<db?1:-1;
+    if((a.dayIndex||0)!==(b.dayIndex||0)) return (b.dayIndex||0)-(a.dayIndex||0);
     const order={sweep:5,matchup:5,comeback:4,'streak-up':3,'streak-down':3,pace:3,'commander-first-win':2,'commander-first-loss':2,commander:1};
     if(order[a.type]!==order[b.type]) return order[b.type]-order[a.type];
     return b.weight-a.weight;
@@ -5113,7 +5120,13 @@ function computeMatchupNews(pA, pB){
   // other (and everyone else) in the same game.
   events.push(...computeGameStory(windowGames).filter(e=>e.type==='sweep' && (e.winner===pA || e.winner===pB)));
 
+  // Sorted chronologically by the game each event is about (newest first), not grouped by
+  // event type — same fix, and same reasoning, as Recent Impact/Commander News: grouping by
+  // type read oddly out of order once every event carried its own date.
   events.sort((a,b)=>{
+    const da=a.date||'', db=b.date||'';
+    if(da!==db) return da<db?1:-1;
+    if((a.dayIndex||0)!==(b.dayIndex||0)) return (b.dayIndex||0)-(a.dayIndex||0);
     const order={rivalry:6,sweep:4};
     if((order[a.type]||0)!==(order[b.type]||0)) return (order[b.type]||0)-(order[a.type]||0);
     return (b.weight||0)-(a.weight||0);
