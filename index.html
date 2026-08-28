@@ -115,6 +115,10 @@ main{padding:30px 0 90px}
 /* subnav (in-page section chips) */
 .subnav{position:sticky;top:var(--topbar-h);z-index:60;display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;padding:10px 0;margin:-10px 0 22px;background:linear-gradient(180deg,var(--bg) 78%,transparent)}
 .subnav::-webkit-scrollbar{display:none}
+/* Fade the trailing edge whenever the pill row actually overflows (see updateSubnavFades()) —
+   without this there's no scrollbar and no visual cue that more sections exist off-screen, so
+   an overflowing row just looks abruptly cut off instead of "scroll for more". */
+.subnav.has-overflow{-webkit-mask-image:linear-gradient(90deg,black calc(100% - 36px),transparent);mask-image:linear-gradient(90deg,black calc(100% - 36px),transparent)}
 .snav{font-family:'Oswald';font-weight:500;font-size:13px;text-transform:uppercase;letter-spacing:.04em;color:var(--ink3);background:var(--panel);border:1px solid var(--line);padding:7px 14px;border-radius:20px;cursor:pointer;white-space:nowrap;transition:.15s;flex-shrink:0}
 .snav:hover{color:var(--ink);border-color:var(--line2)}
 .snav.on{background:var(--gold);color:var(--gold-ink);border-color:var(--gold)}
@@ -735,6 +739,13 @@ tbody tr:hover{background:rgba(217,178,90,.06)}
 .impact-event.tag-trade{border-left-color:#6c7ae0}
 .impact-event.matchup{border-left-color:#c4d15c}
 .impact-event.recap{border-left-color:#5f7268}
+.news-card{position:relative}
+.news-card-toggle{position:absolute;top:18px;right:20px;background:var(--panel2);border:1px solid var(--line);border-radius:8px;width:30px;height:30px;display:flex;align-items:center;justify-content:center;color:var(--ink2);cursor:pointer;transition:.15s;z-index:2}
+.news-card-toggle:hover{border-color:var(--line2);color:var(--ink)}
+.news-card-toggle svg{width:16px;height:16px;transition:transform .2s}
+.news-card.is-collapsed .news-card-toggle svg{transform:rotate(-90deg)}
+.news-card-body{overflow:hidden;max-height:4000px;transition:max-height .3s ease}
+.news-card.is-collapsed .news-card-body{max-height:0}
 @media(max-width:520px){.impact-event{flex-direction:column;align-items:flex-start;gap:6px}.impact-event-date{margin-left:0}}
 
 /* ============ SEARCH OVERLAY ============ */
@@ -978,18 +989,21 @@ main{padding:36px 0 150px}
         <a class="snav" data-target="sec-rglist" data-i="rg_title"></a>
       </nav>
 
-      <div class="sec" id="sec-impact">
+      <div class="sec news-card" id="sec-impact">
+        <button class="news-card-toggle" type="button" aria-label="Toggle section"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg></button>
         <div class="section-head"><h2 data-i="impact_title"></h2></div>
         <div class="hint" style="margin:-8px 0 16px;font-size:13px;color:var(--ink3)" data-i="impact_sub"></div>
-        <div class="rg-controls" style="margin-top:0">
-          <div class="rg-ctrl-row">
-            <span class="rg-ctrl-lbl" data-i="impact_slider_lbl"></span>
-            <input type="range" id="impactSlider" min="1" max="10" step="1" value="2">
-            <span id="impactSliderVal" class="impact-slider-val"></span>
+        <div class="news-card-body">
+          <div class="rg-controls" style="margin-top:0">
+            <div class="rg-ctrl-row">
+              <span class="rg-ctrl-lbl" data-i="impact_slider_lbl"></span>
+              <input type="range" id="impactSlider" min="1" max="10" step="1" value="2">
+              <span id="impactSliderVal" class="impact-slider-val"></span>
+            </div>
+            <div class="rg-focus" id="impactFocus"></div>
           </div>
-          <div class="rg-focus" id="impactFocus"></div>
+          <div class="impact-feed" id="impactList"></div>
         </div>
-        <div class="impact-feed" id="impactList"></div>
       </div>
 
       <div class="sec" id="sec-window">
@@ -1325,7 +1339,7 @@ function colorsCsvUrl(){
   // reuse the exact base of SHEET_CSV_URL, just swap the gid
   return SHEET_CSV_URL.replace(/gid=\d+/, 'gid='+COLORS_GID);
 }
-const I18N = {"en": {"_label": "EN", "_name": "English", "eyebrow": "Commander · EDH · Live Ledger", "title1": "Blizzard", "title2": "Rentner", "sub": "Pulled live from the group spreadsheet — every game, commander, and finish, refreshed straight from the source.", "games_logged": "Games logged", "seats_played": "Seats played", "commanders": "Commanders", "span": "Span", "tab_leaderboard": "Leaderboard", "tab_h2h": "Head to Head", "tab_commanders": "Commanders", "tab_players": "By Player", "tab_length": "Game Length", "refresh": "Refresh", "loading_title": "Loading games from the sheet…", "loading_sub": "Fetching and crunching the latest results.", "err_title": "Couldn't load the sheet", "setup_title": "To connect your sheet:", "setup_1": "In Google Sheets: <b>File → Share → Publish to web</b>", "setup_2": "Under \"Link\", choose the <b>Dataset</b> sheet and format <b>Comma-separated values (.csv)</b>", "setup_3": "Click <b>Publish</b>, copy the URL", "setup_4": "Paste it into the <code>SHEET_CSV_URL</code> line near the top of this HTML file", "setup_5": "Reload this page", "try_again": "Try again", "full_standings": "Full Standings", "sort_hint": "Click any column to sort · win = 1st place finish", "th_player": "Player", "th_games": "Games", "th_wins": "Wins", "th_winrate": "Win Rate", "th_avgfinish": "Avg Finish", "th_solring": "Early Sol Ring", "champion": "Champion", "runnerup": "Runner-up", "third": "Third", "wins_label": "wins", "games_label": "games", "winrate_label": "win rate", "avgfinish_label": "avg finish", "h2h_title": "Head to Head", "h2h_intro": "Pick a player to see who he beat and who beats him — head-to-head across every game he's shared.", "h2h_pick": "Showing rivalries for", "h2h_vs": "vs", "h2h_beats": "finishes ahead of", "h2h_loses": "finishes behind", "h2h_record": "record", "h2h_shared": "shared games", "h2h_winning": "Winning matchups", "h2h_losing": "Losing matchups", "h2h_even": "Even", "h2h_best": "Best matchup", "h2h_worst": "Toughest rival", "h2h_most": "Most played against", "h2h_ahead_pct": "ahead", "h2h_summary": "In {games} shared games, {a} finished ahead of {b} {pct}% of the time.", "h2h_no_games": "no shared games", "h2h_grid_toggle": "Full grid", "h2h_card_toggle": "Rivalries", "h2h_network_toggle": "Network", "h2h_network_help": "Drag players to untangle the web. Node size = games played, line thickness = games shared, line color = who's ahead in that matchup. Click a player for his profile, or a line for the full matchup breakdown.", "h2h_network_leg": "Size = games played · Thickness = games shared", "h2h_grid_help": "Each cell shows how often the LEFT player finishes ahead of the TOP player. Green = left player wins the matchup, red = loses it.", "h2h_row_ahead": "ahead of column", "times": "times", "cmd_title": "Commander Performance", "cmd_shown": "{n} commanders shown", "cmd_mostplayed": "Most Played", "cmd_bestwin": "Best Win %", "cmd_bestfinish": "Best Finish", "cmd_all": "All", "cmd_5plus": "5+ games", "cmd_10plus": "10+ games", "cmd_search": "Search commander…", "cmd_games": "Games", "cmd_winrate": "Win rate", "cmd_avgfinish": "Avg finish", "cmd_nomatch": "No commanders match \"{q}\"", "players_title": "By Player", "players_hint": "Each pilot's decks, ranked by games played", "overall_winrate": "overall win rate", "decks_piloted": "decks piloted", "pc_games": "Games", "pc_wins": "Wins", "pc_wr_finish": "Win rate / finish", "pc_avgtime": "Avg time", "pc_sweeps": "Clean Sweeps", "length_title": "Game Length", "length_count": "{n} games with time logged", "gl_average": "Average", "gl_median": "Median", "gl_shortest": "Shortest", "gl_longest": "Longest", "gl_distribution": "Distribution", "gl_dist_sub": "How long games actually run, in minutes", "gl_none": "No game-time data found in the sheet.", "activity_title": "Play Activity", "activity_sub": "When the group actually plays — every dated game in the selected time frame", "activity_none": "Not enough dated games yet.", "activity_cell": "{date}: {n} games", "act_sessions": "Sittings", "act_sessions_note": "{n} games total", "act_longest": "Longest Sitting", "act_avg_session": "Avg Games / Sitting", "act_avg_gap": "Avg Days Between Sittings", "year_all": "All Time", "year_label": "Year", "foot_live": "Live data", "foot_link_schreifall": "Schreifall — find new cards", "foot_link_playroom": "Playroom — test your decks", "min_games_note": "players with 20+ games ranked", "no_year_data": "No games recorded for {year}.", "cmd_custom": "Custom", "cmd_custom_ph": "min games", "h2h_dig": "Tap a rival for the deck-by-deck breakdown", "h2h_view_profile": "View {name}'s full profile", "md_title": "Matchup Breakdown", "md_back": "Back to rivalries", "md_overall": "Overall head-to-head", "md_when": "When they share a table", "md_a_decks": "{name}'s decks in this matchup", "md_b_decks": "{name}'s decks in this matchup", "md_deck_duels": "Deck vs deck duels", "md_deck_duels_sub": "Specific commander pairings when both were seated together", "md_ahead": "ahead", "md_behind": "behind", "md_vs": "vs", "md_games_short": "g", "md_no_data": "No shared games between these two players{yr}.", "md_finishes_ahead": "finishes ahead", "md_record_in": "in {n} shared games", "md_pick_rival": "Choose a rival to break down", "md_form_title": "Recent Form", "md_form_sub": "Last {n} shared games, oldest → newest", "md_streak_line": "{name} has finished ahead in {n} meetings running.", "md_no_streak": "No active streak right now — their most recent meeting didn't extend one.", "md_streak_best": "Longest streak this matchup: {a} {an} · {b} {bn}", "md_avgfinish_label": "Avg Finish (this matchup)", "md_solring_label": "Early Sol Ring (this matchup)", "th_deck": "Deck", "th_rec": "Record (ahead–behind)", "th_wr": "Ahead %", "rec_explain_title": "Reading the records", "rec_explain": "Records show <b>ahead–behind</b> (e.g. <b>8–3</b> = finished ahead 8 times, behind 3). When games tied on finishing position, a third number is added: <b>ahead–behind–tied</b> (e.g. <b>15–9–4</b>).", "tab_trends": "Trends", "tab_other": "Other", "tab_compare": "Compare", "cmp_title": "Player Comparison", "cmp_sub": "Every player side by side, all-time and year by year — pick a metric", "cmp_none": "No player data yet.", "cmp_cards_sub": "Everyone's stat line at a glance, for the current time scope — click a card for the full profile", "cmp_table_title": "Compare By Year", "cmt_help": "Each tag goes to the one player at the extreme for that period. To keep small samples from skewing it, a player needs 30+ games for the all-time column and 15+ for a single year. A dash means nobody qualified. Timed-game tags (Slowpoke/Speedrunner) only appear where games had times logged. Wallflower is the exception — it lists everyone who ended the period without a title.", "cmt_tag_col": "Tag", "cmp_m_winrate": "Win Rate", "cmp_m_games": "Games", "cmp_m_avg": "Avg Finish", "cmp_m_podium": "Podium %", "cmp_m_sol": "Sol Ring %", "cmp_m_seat": "Avg Seat", "cmp_m_avgtime": "Avg Game Time", "cmp_m_deckcount": "Decks Piloted", "cmp_m_topCmd": "Top Commander", "cmp_m_topColor": "Top Color", "cmp_m_help_winrate": "Win rate (% of games finished 1st). Best per column is underlined.", "cmp_m_help_games": "Games played. Best per column is underlined.", "cmp_m_help_avg": "Average finishing position (lower is better). Best per column is underlined.", "cmp_m_help_podium": "Share of games finished in the top 2. Best per column is underlined.", "cmp_m_help_sol": "How often he lands an early Sol Ring. Best per column is underlined.", "cmp_m_help_seat": "Average seat (turn order) he played from — just for context, no 'best'.", "cmp_m_help_avgtime": "Average length of games he played in, in minutes — just for context, no 'best'.", "cmp_m_help_deckcount": "How many distinct commanders he's piloted. Best per column is underlined.", "cmp_m_help_topCmd": "Their most-played commander in each period, with how many games.", "cmp_m_help_topColor": "Their most-played color in each period, with how many games.", "tag_endboss": "Endboss", "tag_endboss_d": "Highest win rate — the one everyone's gunning for", "tag_badluck": "Bad Luck", "tag_badluck_d": "Lowest win rate — the dice have been cruel", "tag_grinder": "Grinder", "tag_grinder_d": "Most games played — always at the table", "tag_podium": "Podium Regular", "tag_podium_d": "Most top-2 finishes", "tag_solking": "Sol Ring King", "tag_solking_d": "Lands an early Sol Ring more than anyone", "tag_brewer": "Brewer", "tag_brewer_d": "Most distinct commanders — always trying something new", "tag_onetrick": "One-Trick", "tag_onetrick_d": "Most games on a single deck — knows what works", "tag_slowpoke": "Slowpoke", "tag_slowpoke_d": "Plays in the longest games on average", "tag_speed": "Speedrunner", "tag_speed_d": "Plays in the fastest games on average", "tag_streaker": "Hot Hand", "tag_streaker_d": "Longest win streak ever recorded", "tag_rentner": "Rentner", "tag_rentner_d": "Longest losing streak — pension's coming any day now", "tag_executioner": "Executioner", "tag_executioner_d": "Most Clean Sweep wins — one winner, the other three tied for last", "tag_onfire": "On Fire", "tag_onfire_d": "Currently on the longest active win streak", "tag_deco": "Wallflower", "tag_deco_d": "No standout tag this time — just here looking good", "tag_bench": "On the Bench", "tag_bench_d": "Fewest games — always the sub, rarely subbed in", "trends_title": "Win Rate Over Time", "trends_sub": "How each player's form has shifted across the months", "trend_rolling": "Rolling form", "trend_career": "Career average", "trend_rolling_hint": "Last {n} games — shows hot and cold streaks", "trend_career_hint": "Cumulative win rate — converges to each player's long-run level", "trend_no_data": "Not enough dated games to chart a trend.", "meta_title": "Commander Choices Over Time", "meta_sub": "This player's pick share by quarter — his most-played decks, plus everything else lumped together", "meta_none": "Not enough dated games to chart this yet.", "meta_other": "Other", "finish_title": "Finishing Positions", "finish_sub": "How often each player lands in each seat — the shape of consistency", "finish_1st": "1st", "finish_2nd": "2nd", "finish_3rd": "3rd", "finish_4th": "4th", "finish_legend": "Each bar is one player's games split by finishing position", "other_turn_title": "Does Turn Order Matter?", "other_turn_sub": "Win rate by seat position — turn 1 goes first", "other_turn_seat": "Seat", "other_turn_note": "Across {n} games. Going first {verdict}.", "other_turn_helps": "tends to help", "other_turn_hurts": "shows a disadvantage", "other_turn_neutral": "is roughly neutral", "other_sol_title": "The Sol Ring Effect", "other_sol_sub": "Win rate when a player drops an early Sol Ring vs when he doesn't", "other_sol_with": "With Early Sol Ring", "other_sol_without": "Without", "other_sol_lift": "That's a {pts}-point swing", "other_sol_rate": "Early Sol Ring lands in {pct}% of all games played", "other_finish_title": "Finish Counts", "other_finish_sub": "Exact tallies of where each player lands — click a column to sort", "chart_winrate": "Win rate", "chart_games": "games", "chart_of_games": "of games", "fc_player": "Player", "fc_games": "Games", "fc_1st": "1st", "fc_2nd": "2nd", "fc_3rd": "3rd", "fc_4th": "4th", "fc_podium": "Podium %", "fc_podium_hint": "top-2 finishes", "streak_title": "Streaks & Droughts", "streak_sub": "Longest runs of consecutive wins, and longest dry spells without one", "streak_best_win": "Best win run", "streak_best_dry": "Longest drought", "streak_cur_win": "On a {n}-win run", "streak_cur_dry": "{n} without a win", "streak_none": "Not enough games yet.", "div_title": "Commander Diversity", "div_sub": "One-trick specialists vs restless brewers", "div_decks": "decks", "div_eff": "effective", "div_top": "top deck", "div_brewer": "Brewer", "div_trick": "One-trick", "div_note": "\"Effective\" decks = how many decks a player really spreads across, weighting by how often each is played (a perplexity score) — higher means more variety. \"Top deck\" = the share of their games on their single most-played commander; a high % means they lean on one deck.", "div_none": "Not enough games yet.", "parity_title": "Pod Parity Over Time", "parity_sub": "Spread of win rates across players — a shrinking line means a more balanced pod", "parity_note": "Compared to earlier, the pod is {verdict}.", "parity_steady": "holding steady", "parity_closer": "getting closer", "parity_wider": "spreading apart", "parity_none": "Not enough dated games to chart parity.", "cd_back": "Back to commanders", "cd_title": "Commander Profile", "cd_games": "Games", "cd_winrate": "Win rate", "cd_avgfinish": "Avg finish", "cd_pilots": "Pilots", "cd_piloted_by": "Piloted by", "cd_vs_players": "Against each player", "cd_vs_players_sub": "How this commander finishes versus each opponent at the table", "cd_best_vs": "Beats", "cd_worst_vs": "Struggles against", "cd_finish_spread": "Finish spread", "cd_deck_matchups": "Deck matchups", "cd_deck_matchups_sub": "Best and worst results against specific opposing commanders ({min}+ games)", "cd_ahead": "ahead", "cd_behind": "behind", "cd_of": "of", "cd_in_games": "in {n} games", "cd_no_matchups": "Not enough repeated deck matchups yet to show reliable results.", "cd_by_pilot": "By pilot", "cd_click_hint": "Click a commander card to see its full profile", "cd_vs": "vs", "cd_pilot_wr": "win rate", "cd_best_matchup": "Best matchup", "cd_worst_matchup": "Toughest matchup", "cd_most_faced": "Faced most", "cd_seat": "avg seat", "cd_solrate": "Early Sol Ring", "year_custom": "Custom", "date_from": "From", "date_to": "To", "date_apply": "Apply", "date_clear": "Clear", "date_range_label": "Date range", "date_all_months": "All", "pp_back": "Back to leaderboard", "pp_title": "Player Profile", "pp_games": "Games", "pp_winrate": "Win rate", "pp_avgfinish": "Avg finish", "pp_decks": "Decks", "pp_yoy": "Year on Year", "pp_yoy_sub": "How this player's results have changed each year", "pp_yoy_year": "Year", "pp_yoy_games": "Games", "pp_yoy_wins": "Wins", "pp_yoy_wr": "Win %", "pp_yoy_avg": "Avg finish", "pp_yoy_podium": "Podium %", "pp_trend": "Win Rate Over Time", "pp_trend_sub": "Last {n} games", "pp_finish": "Finish Spread", "pp_rivals": "Rivalries", "pp_rivals_sub": "Record against each opponent — click to dig in", "pp_best_rival": "Best matchup", "pp_worst_rival": "Toughest rival", "pp_seat": "Seat Performance", "pp_seat_sub": "Win rate by turn order", "pp_decks_title": "Decks Piloted", "pp_decks_sub": "Ranked by games played — click for the full commander profile", "pp_decks_sort_games": "Most played", "pp_decks_sort_winrate": "Win rate", "pp_decks_sort_time": "Avg time", "pp_best_deck": "Best deck", "pp_worst_deck": "Weakest deck", "pp_solring": "Early Sol Ring", "pp_best_seat": "Best seat", "ppsol_title": "Sol Ring Impact", "ppsol_sub": "Win rate when he lands an early Sol Ring vs when he doesn't", "ppsol_with": "With Early Sol Ring", "ppsol_without": "Without", "ppsol_swing": "point swing", "ppsol_rate": "Lands an early Sol Ring in {pct}% of his games", "presence_title": "The Presence Effect", "presence_sub": "Does this player's win rate shift depending on who else is at the table?", "presence_pts": "pts", "presence_with": "With him", "presence_without": "Without him", "presence_note": "Comparing win rate in games where an opponent was seated vs not — a correlation, not proof of cause (the rest of the table differs between the two groups too). Needs {min}+ games in both groups to show.", "presence_col_player": "Player", "presence_col_vs": "vs", "presence_col_with": "With %", "presence_col_without": "Without %", "presence_col_delta": "Swing", "presence_none": "Not enough overlapping games yet to measure this.", "presence_insights_sub": "The biggest swings across the whole group — click either name for his profile", "pp_ahead": "ahead", "pp_click_player": "Click a player to see his full profile", "pp_no_year": "No games this period.", "pp_seat_label": "Seat", "pp_overall": "overall", "tab_recent": "Recent Games", "rg_title": "Recent Games", "rg_sub": "The latest matches — newest first", "rg_game": "Game", "rg_min": "min", "rg_no_time": "no time logged", "rg_load_more": "Load more", "rg_showing": "Showing {n} of {total}", "rg_winner": "Winner", "rg_none": "No games to show.", "rg_players_lbl": "Players", "rg_pfilter_tip": "Toggle a player to hide or show every game he sat in", "rg_window_lbl": "Window size", "rg_win_all": "All", "rg_win_custom_ph": "custom", "rg_focus_all": "Showing all {n} games", "rg_focus_window": "Games {from}–{to} of {total} (newest = 1)", "rg_trend_title": "Finishing Positions", "rg_trend_sub": "How each player finished across these {n} games", "rg_trend_none": "Not enough games to chart yet.", "rg_click_hint": "Click any player or commander to see their full profile", "rg_seat": "seat", "rg_sol": "Early Sol Ring", "pace_title": "Commander Pace", "pace_sub": "Which commanders show up in fast games vs slow ones", "pace_help": "Average length of games each commander appeared in, compared to the overall average ({avg}m). Negative = games tend to run faster when this commander is at the table; positive = slower. Based on timed games only.", "pace_fastest": "Fastest tables", "pace_slowest": "Slowest tables", "pace_faster": "faster", "pace_slower": "slower", "pace_avg": "avg game", "pace_games": "timed games", "pace_none": "No timed games to analyse.", "pace_min_note": "Commanders with {min}+ timed games", "pace_vs_avg": "vs average", "color_W": "White", "color_U": "Blue", "color_B": "Black", "color_R": "Red", "color_G": "Green", "color_C": "Colorless", "cs_title": "Color Breakdown", "cs_sub": "How the pod's commander colors perform — respects the year filter above", "cs_bycolor_title": "Win Rate by Color", "cs_bycolor_sub": "Each seat counts toward every color in its commander's identity", "cs_bycount_title": "Mono vs Multicolor", "cs_bycount_sub": "Does adding colors help? Win rate by number of colors", "cs_count_1": "1 (Mono)", "cs_count_2": "2 colors", "cs_count_3": "3 colors", "cs_count_4": "4 colors", "cs_count_5": "5 colors", "cs_seats": "seats", "cs_none": "No color data for these games yet.", "cs_expected": "For reference, an average seat wins ~{n}% in a 4-player game.", "cs_games_short": "g", "pcolor_title": "Color Profile", "pcolor_sub": "Which colors this player gravitates to, and how he does in them", "pcolor_fav": "Favorite color", "pcolor_least": "Least played", "pcolor_most_combo": "Go-to combination", "pcolor_least_combo": "Rarest combination", "pcolor_by_color": "Games by Color", "pcolor_by_color_sub": "Each deck counts toward every color in its identity", "pcolor_combos": "Color Combinations", "pcolor_combos_sub": "Exact identities piloted ({n} distinct)", "pcolor_of_games": "of games", "pcolor_more": "more", "pcolor_by_color_sub2": "Share of this player's games each color appears in, and win rate", "pcolor_combos_sub2": "Share of games by exact identity ({n} distinct) · bar shows the full split", "pcolor_weight": "Color Weight", "pcolor_weight_sub": "Overall color mix — each game split evenly across its colors (sums to 100%)", "cmp_m_tags": "Tags", "cmp_m_help_tags": "Who held each superlative — all-time and year by year. Independent of the year filter above.", "nav_overview": "Overview", "nav_games": "Games", "nav_players": "Players", "nav_insights": "Insights", "hl_lastgame": "Last game", "fin_view_chart": "Chart", "fin_view_table": "Table", "search_ph": "Search players & commanders…", "search_none": "No matches for \"{q}\"", "search_tip": "Press / anywhere to search", "scope_ind": "All-time & year by year — independent of the time scope", "rg_pfilter_scope": "With a player filter active, the list searches the entire history — beyond the selected time scope — so the window can always fill.", "scope_label": "Time scope", "menu_more": "More", "gw_title": "Game Window", "gw_sub": "Pick who's at the table and slide through history — everything on this page follows this window", "impact_title": "Recent Impact", "impact_sub": "Notable things the last few games changed — streaks, standings, rivalries, first-time decks", "impact_slider_lbl": "Recent games", "impact_focus": "Based on the last {n} {games}", "impact_none": "Not enough games yet to measure recent impact.", "impact_quiet": "Nothing stood out in the last {n} {games} — just business as usual.", "impact_ev_rank": "{name} moved from #{from} to #{to} in the standings.", "impact_ev_streak_win": "{name} is on a {n}-game win streak.", "impact_ev_streak_dry": "{name} is on a {n}-game losing streak.", "impact_ev_streak_snap_win": "{name}'s {n}-game win streak came to an end.", "impact_ev_streak_snap_dry": "{name} broke his {n}-game losing streak. Congratulations!", "impact_ev_rivalry_tie": "{a} and {b} are now tied in their head-to-head ({rec}).", "impact_ev_rivalry_flip": "{leader} took the head-to-head lead over {other} ({rec}).", "impact_ev_commander": "{name} piloted {commander} for the first time this period{outcome}", "impact_outcome_win": " — and won!", "impact_outcome_other": ", finishing #{rank}.", "impact_ev_commander_first_win": "{name} banked his first-ever win with {commander}!", "impact_ev_commander_first_win_year": "{name} banked his first {year} win with {commander}!", "impact_ev_commander_first_win_period": "{name} banked his first win with {commander} this period!", "impact_ev_commander_first_loss": "{name}'s {commander} was undefeated at {n}-0 — not anymore.", "impact_ev_commander_first_loss_year": "{name}'s {commander} was undefeated at {n}-0 in {year} — not anymore.", "impact_ev_commander_first_loss_period": "{name}'s {commander} was undefeated at {n}-0 this period — not anymore.", "cd_news_title": "Commander News", "cd_news_sub": "Notable moments from this commander's playtime — new pilots, streaks, and statement wins.", "cd_news_focus_partial": "Based on the last {n} of {total} games", "cd_news_focus_all": "Based on all {n} games", "cd_news_quiet": "Nothing stood out yet — just steady play so far.", "md_news_title": "Rivalry News", "md_news_sub": "Notable moments from their shared games — head-to-head lead changes and statement wins.", "md_news_focus_partial": "Based on their last {n} of {total} shared games", "md_news_focus_all": "Based on all {n} shared games", "md_news_quiet": "Nothing stood out yet — just steady play so far.", "cd_ev_debut": "{name} picked up this commander for the first time{outcome}", "cd_ev_debut_year": "{name} picked up this commander for the first time in {year}{outcome}", "cd_ev_debut_period": "{name} picked up this commander for the first time this period{outcome}", "cd_ev_sweep_1": "This commander swept the entire table, piloted by {name}.", "cd_ev_sweep_2": "A clean sweep for this commander — {name} took the whole table down at once.", "cd_ev_pace_reallyfast": "This commander closed out a win in just {mins} minutes, piloted by {name}.", "cd_ev_pace_fast": "A brisk {mins}-minute win for this commander, piloted by {name}.", "cd_ev_pace_long": "This commander ground out a {mins}-minute win with {name} at the helm.", "cd_ev_pace_verylong": "This commander outlasted the table in a {mins}-minute marathon, piloted by {name}.", "cd_ev_comeback_win_1": "{name} dusted off this commander after {n} games on the shelf — and beat {opponent} with it.", "cd_ev_comeback_win_2": "Back after {n} games away, {name} piloted this commander straight to a win over {opponent}.", "cd_ev_comeback_win_3": "{name} dug this deck out of the sleeve box and beat {opponent} on the very first try.", "cd_ev_comeback_win_4": "Turns out {n} games of rust didn't matter — {name} beat {opponent} anyway.", "cd_ev_comeback_win_5": "Fresh off the shelf after {n} games away, this deck still had it — {name} took down {opponent}.", "cd_ev_comeback_loss_1": "{name} dusted off this commander after {n} games on the shelf, but {opponent} sent it right back.", "cd_ev_comeback_loss_2": "Back after {n} games away, {name} couldn't get past {opponent} this time.", "cd_ev_comeback_loss_3": "{name} dug this deck out of the sleeve box, and {opponent} reminded them why it was shelved.", "cd_ev_comeback_loss_4": "Turns out {n} games of rust does matter — {opponent} took this one from {name}.", "cd_ev_comeback_loss_5": "Fresh off the shelf after {n} games away, but {opponent} was fresher — {name} fell short.", "cd_ev_recap": "{name} piloted this commander{outcome}", "impact_tag_recap": "Game Log", "cd_ev_streak_win": "This commander is riding a {n}-game win streak.", "cd_ev_streak_dry": "This commander hasn't won in its last {n} games.", "cd_ev_streak_snap_win": "The {n}-game win streak just ended.", "cd_ev_streak_snap_dry": "Back in the win column after {n} games without one. Congratulations!", "impact_ev_sweep_1": "Of course {winner} beat everyone at the same time. Totally expected.", "impact_ev_sweep_2": "{winner} apparently couldn't pick just one victim, so he took out {losers} together.", "impact_ev_sweep_3": "Clean sweep! {winner} took down {losers} in the same breath.", "impact_ev_sweep_4": "Well played, {winner} — a full table wipe, {losers} included.", "impact_ev_sweep_5": "{winner} ended {losers}'s games at exactly the same moment.", "impact_tag_rank": "Standings", "impact_tag_hot": "Hot Streak", "impact_tag_cold": "Cold Streak", "impact_tag_streak_end": "Streak Ended", "impact_tag_turnaround": "Turnaround", "impact_tag_rivalry": "Rivalry", "impact_tag_commander": "First Time", "impact_tag_first_win": "First Win", "impact_tag_first_loss": "First Loss", "impact_tag_sweep": "Clean Sweep", "impact_day_game": "Game {n}", "impact_ev_trade_endboss": "{new} just dethroned {old} as the pod's Endboss.", "impact_ev_trade_badluck": "{new} has inherited {old}'s Bad Luck streak — condolences.", "impact_ev_trade_grinder": "{new} out-grinded {old} to become the new Grinder.", "impact_ev_trade_bench": "{new} is riding the bench harder than {old} these days.", "impact_ev_trade_podium": "{new} bumped {old} off the Podium Regular spot.", "impact_ev_trade_solking": "{new} seized the Sol Ring King crown from {old}.", "impact_ev_trade_brewer": "{new} is brewing more decks than {old} now — new Brewer in town.", "impact_ev_trade_onetrick": "{new} took the One-Trick title from {old}.", "impact_ev_trade_slowpoke": "{new} out-slowpoked {old} for the new Slowpoke record.", "impact_ev_trade_speed": "{new} stole the Speedrunner crown from {old}.", "impact_ev_trade_streaker": "{new} broke {old}'s Hot Hand record for longest win streak.", "impact_ev_trade_rentner": "{new} has taken over as Rentner from {old}. Our condolences.", "impact_ev_trade_executioner": "{new} out-swept {old} for the Executioner title.", "impact_ev_trade_onfire": "{new} is On Fire now — {old}'s heater just ended.", "impact_tag_comeback": "Comeback", "impact_tag_matchup": "Matchup", "impact_tag_pace_reallyfast": "Really Fast", "impact_tag_pace_fast": "Fast Game", "impact_tag_pace_long": "Long Game", "impact_tag_pace_verylong": "Very Very Long", "impact_ev_pace_reallyfast_1": "{winner} closed it out in just {mins} minutes. Blink and you'd have missed it.", "impact_ev_pace_reallyfast_2": "{mins} minutes and it was already over — {winner} doesn't mess around.", "impact_ev_pace_fast_1": "{winner} wrapped it up in a brisk {mins} minutes.", "impact_ev_pace_fast_2": "A quick one — {winner} took it down in {mins} minutes.", "impact_ev_pace_long_1": "{winner} finally closed it out after a {mins}-minute grind.", "impact_ev_pace_long_2": "{mins} minutes in the making, but {winner} got there.", "impact_ev_pace_verylong_1": "{mins} minutes?! {winner} outlasted everyone in an absolute marathon.", "impact_ev_pace_verylong_2": "A {mins}-minute epic — {winner} was still standing at the end.", "impact_ev_pace_accent_reallyfast": "And it was over in just {mins} minutes.", "impact_ev_pace_accent_fast": "All in a brisk {mins} minutes.", "impact_ev_pace_accent_long": "After a {mins}-minute grind.", "impact_ev_pace_accent_verylong": "Somehow it still took {mins} minutes.", "impact_ev_solring_accent": "He also had an early Sol Ring going.", "impact_ev_comeback_1": "Look who decided to show up — {name} is back after {n} weeks away.", "impact_ev_comeback_2": "{name} returns from the shadow realm after {n} weeks. Welcome back, stranger.", "impact_ev_comeback_3": "Remember {name}? {n} weeks later, he remembered us too.", "games_ind": "Entire history — independent of the time scope", "tag_guest": "Guest", "tag_guest_d": "Fewer than 15 games in this period — not enough to earn a title", "iw_sub": "Focus every chart below on the most recent games — within the current time scope. Leave it on All for the full picture.", "iw_focus": "Last {n} of {total} games in scope", "iw_focus_all": "All {n} games in scope"}};
+const I18N = {"en": {"_label": "EN", "_name": "English", "eyebrow": "Commander · EDH · Live Ledger", "title1": "Blizzard", "title2": "Rentner", "sub": "Pulled live from the group spreadsheet — every game, commander, and finish, refreshed straight from the source.", "games_logged": "Games logged", "seats_played": "Seats played", "commanders": "Commanders", "span": "Span", "tab_leaderboard": "Leaderboard", "tab_h2h": "Head to Head", "tab_commanders": "Commanders", "tab_players": "By Player", "tab_length": "Game Length", "refresh": "Refresh", "loading_title": "Loading games from the sheet…", "loading_sub": "Fetching and crunching the latest results.", "err_title": "Couldn't load the sheet", "setup_title": "To connect your sheet:", "setup_1": "In Google Sheets: <b>File → Share → Publish to web</b>", "setup_2": "Under \"Link\", choose the <b>Dataset</b> sheet and format <b>Comma-separated values (.csv)</b>", "setup_3": "Click <b>Publish</b>, copy the URL", "setup_4": "Paste it into the <code>SHEET_CSV_URL</code> line near the top of this HTML file", "setup_5": "Reload this page", "try_again": "Try again", "full_standings": "Full Standings", "sort_hint": "Click any column to sort · win = 1st place finish", "th_player": "Player", "th_games": "Games", "th_wins": "Wins", "th_winrate": "Win Rate", "th_avgfinish": "Avg Finish", "th_solring": "Early Sol Ring", "champion": "Champion", "runnerup": "Runner-up", "third": "Third", "wins_label": "wins", "games_label": "games", "winrate_label": "win rate", "avgfinish_label": "avg finish", "h2h_title": "Head to Head", "h2h_intro": "Pick a player to see who he beat and who beats him — head-to-head across every game he's shared.", "h2h_pick": "Showing rivalries for", "h2h_vs": "vs", "h2h_beats": "finishes ahead of", "h2h_loses": "finishes behind", "h2h_record": "record", "h2h_shared": "shared games", "h2h_winning": "Winning matchups", "h2h_losing": "Losing matchups", "h2h_even": "Even", "h2h_best": "Best matchup", "h2h_worst": "Toughest rival", "h2h_most": "Most played against", "h2h_ahead_pct": "ahead", "h2h_summary": "In {games} shared games, {a} finished ahead of {b} {pct}% of the time.", "h2h_no_games": "no shared games", "h2h_grid_toggle": "Full grid", "h2h_card_toggle": "Rivalries", "h2h_network_toggle": "Network", "h2h_network_help": "Drag players to untangle the web. Node size = games played, line thickness = games shared, line color = who's ahead in that matchup. Click a player for his profile, or a line for the full matchup breakdown.", "h2h_network_leg": "Size = games played · Thickness = games shared", "h2h_grid_help": "Each cell shows how often the LEFT player finishes ahead of the TOP player. Green = left player wins the matchup, red = loses it.", "h2h_row_ahead": "ahead of column", "times": "times", "cmd_title": "Commander Performance", "cmd_shown": "{n} commanders shown", "cmd_mostplayed": "Most Played", "cmd_bestwin": "Best Win %", "cmd_bestfinish": "Best Finish", "cmd_all": "All", "cmd_5plus": "5+ games", "cmd_10plus": "10+ games", "cmd_search": "Search commander…", "cmd_games": "Games", "cmd_winrate": "Win rate", "cmd_avgfinish": "Avg finish", "cmd_nomatch": "No commanders match \"{q}\"", "players_title": "By Player", "players_hint": "Each pilot's decks, ranked by games played", "overall_winrate": "overall win rate", "decks_piloted": "decks piloted", "pc_games": "Games", "pc_wins": "Wins", "pc_wr_finish": "Win rate / finish", "pc_avgtime": "Avg time", "pc_sweeps": "Clean Sweeps", "length_title": "Game Length", "length_count": "{n} games with time logged", "gl_average": "Average", "gl_median": "Median", "gl_shortest": "Shortest", "gl_longest": "Longest", "gl_distribution": "Distribution", "gl_dist_sub": "How long games actually run, in minutes", "gl_none": "No game-time data found in the sheet.", "activity_title": "Play Activity", "activity_sub": "When the group actually plays — every dated game in the selected time frame", "activity_none": "Not enough dated games yet.", "activity_cell": "{date}: {n} games", "act_sessions": "Sittings", "act_sessions_note": "{n} games total", "act_longest": "Longest Sitting", "act_avg_session": "Avg Games / Sitting", "act_avg_gap": "Avg Days Between Sittings", "year_all": "All Time", "year_label": "Year", "foot_live": "Live data", "foot_link_schreifall": "Schreifall — find new cards", "foot_link_playroom": "Playroom — test your decks", "min_games_note": "players with 20+ games ranked", "no_year_data": "No games recorded for {year}.", "cmd_custom": "Custom", "cmd_custom_ph": "min games", "h2h_dig": "Tap a rival for the deck-by-deck breakdown", "h2h_view_profile": "View {name}'s full profile", "md_title": "Matchup Breakdown", "md_back": "Back to rivalries", "md_overall": "Overall head-to-head", "md_when": "When they share a table", "md_a_decks": "{name}'s decks in this matchup", "md_b_decks": "{name}'s decks in this matchup", "md_deck_duels": "Deck vs deck duels", "md_deck_duels_sub": "Specific commander pairings when both were seated together", "md_ahead": "ahead", "md_behind": "behind", "md_vs": "vs", "md_games_short": "g", "md_no_data": "No shared games between these two players{yr}.", "md_finishes_ahead": "finishes ahead", "md_record_in": "in {n} shared games", "md_pick_rival": "Choose a rival to break down", "md_form_title": "Recent Form", "md_form_sub": "Last {n} shared games, oldest → newest", "md_streak_line": "{name} has finished ahead in {n} meetings running.", "md_no_streak": "No active streak right now — their most recent meeting didn't extend one.", "md_streak_best": "Longest streak this matchup: {a} {an} · {b} {bn}", "md_avgfinish_label": "Avg Finish (this matchup)", "md_solring_label": "Early Sol Ring (this matchup)", "th_deck": "Deck", "th_rec": "Record (ahead–behind)", "th_wr": "Ahead %", "rec_explain_title": "Reading the records", "rec_explain": "Records show <b>ahead–behind</b> (e.g. <b>8–3</b> = finished ahead 8 times, behind 3). When games tied on finishing position, a third number is added: <b>ahead–behind–tied</b> (e.g. <b>15–9–4</b>).", "tab_trends": "Trends", "tab_other": "Other", "tab_compare": "Compare", "cmp_title": "Player Comparison", "cmp_sub": "Every player side by side, all-time and year by year — pick a metric", "cmp_none": "No player data yet.", "cmp_cards_sub": "Everyone's stat line at a glance, for the current time scope — click a card for the full profile", "cmp_table_title": "Compare By Year", "cmt_help": "Each tag goes to the one player at the extreme for that period. To keep small samples from skewing it, a player needs 30+ games for the all-time column and 15+ for a single year. A dash means nobody qualified. Timed-game tags (Slowpoke/Speedrunner) only appear where games had times logged. Wallflower is the exception — it lists everyone who ended the period without a title.", "cmt_tag_col": "Tag", "cmp_m_winrate": "Win Rate", "cmp_m_games": "Games", "cmp_m_avg": "Avg Finish", "cmp_m_podium": "Podium %", "cmp_m_sol": "Sol Ring %", "cmp_m_seat": "Avg Seat", "cmp_m_avgtime": "Avg Game Time", "cmp_m_deckcount": "Decks Piloted", "cmp_m_topCmd": "Top Commander", "cmp_m_topColor": "Top Color", "cmp_m_help_winrate": "Win rate (% of games finished 1st). Best per column is underlined.", "cmp_m_help_games": "Games played. Best per column is underlined.", "cmp_m_help_avg": "Average finishing position (lower is better). Best per column is underlined.", "cmp_m_help_podium": "Share of games finished in the top 2. Best per column is underlined.", "cmp_m_help_sol": "How often he lands an early Sol Ring. Best per column is underlined.", "cmp_m_help_seat": "Average seat (turn order) he played from — just for context, no 'best'.", "cmp_m_help_avgtime": "Average length of games he played in, in minutes — just for context, no 'best'.", "cmp_m_help_deckcount": "How many distinct commanders he's piloted. Best per column is underlined.", "cmp_m_help_topCmd": "Their most-played commander in each period, with how many games.", "cmp_m_help_topColor": "Their most-played color in each period, with how many games.", "tag_endboss": "Endboss", "tag_endboss_d": "Highest win rate — the one everyone's gunning for", "tag_badluck": "Bad Luck", "tag_badluck_d": "Lowest win rate — the dice have been cruel", "tag_grinder": "Grinder", "tag_grinder_d": "Most games played — always at the table", "tag_podium": "Podium Regular", "tag_podium_d": "Most top-2 finishes", "tag_solking": "Sol Ring King", "tag_solking_d": "Lands an early Sol Ring more than anyone", "tag_brewer": "Brewer", "tag_brewer_d": "Most distinct commanders — always trying something new", "tag_onetrick": "One-Trick", "tag_onetrick_d": "Most games on a single deck — knows what works", "tag_slowpoke": "Slowpoke", "tag_slowpoke_d": "Plays in the longest games on average", "tag_speed": "Speedrunner", "tag_speed_d": "Plays in the fastest games on average", "tag_streaker": "Hot Hand", "tag_streaker_d": "Longest win streak ever recorded", "tag_rentner": "Rentner", "tag_rentner_d": "Longest losing streak — pension's coming any day now", "tag_executioner": "Executioner", "tag_executioner_d": "Most Clean Sweep wins — one winner, the other three tied for last", "tag_onfire": "On Fire", "tag_onfire_d": "Currently on the longest active win streak", "tag_deco": "Wallflower", "tag_deco_d": "No standout tag this time — just here looking good", "tag_bench": "On the Bench", "tag_bench_d": "Fewest games — always the sub, rarely subbed in", "trends_title": "Win Rate Over Time", "trends_sub": "How each player's form has shifted across the months", "trend_rolling": "Rolling form", "trend_career": "Career average", "trend_rolling_hint": "Last {n} games — shows hot and cold streaks", "trend_career_hint": "Cumulative win rate — converges to each player's long-run level", "trend_no_data": "Not enough dated games to chart a trend.", "meta_title": "Commander Choices Over Time", "meta_sub": "This player's pick share by quarter — his most-played decks, plus everything else lumped together", "meta_none": "Not enough dated games to chart this yet.", "meta_other": "Other", "finish_title": "Finishing Positions", "finish_sub": "How often each player lands in each seat — the shape of consistency", "finish_1st": "1st", "finish_2nd": "2nd", "finish_3rd": "3rd", "finish_4th": "4th", "finish_legend": "Each bar is one player's games split by finishing position", "other_turn_title": "Does Turn Order Matter?", "other_turn_sub": "Win rate by seat position — turn 1 goes first", "other_turn_seat": "Seat", "other_turn_note": "Across {n} games. Going first {verdict}.", "other_turn_helps": "tends to help", "other_turn_hurts": "shows a disadvantage", "other_turn_neutral": "is roughly neutral", "other_sol_title": "The Sol Ring Effect", "other_sol_sub": "Win rate when a player drops an early Sol Ring vs when he doesn't", "other_sol_with": "With Early Sol Ring", "other_sol_without": "Without", "other_sol_lift": "That's a {pts}-point swing", "other_sol_rate": "Early Sol Ring lands in {pct}% of all games played", "other_finish_title": "Finish Counts", "other_finish_sub": "Exact tallies of where each player lands — click a column to sort", "chart_winrate": "Win rate", "chart_games": "games", "chart_of_games": "of games", "fc_player": "Player", "fc_games": "Games", "fc_1st": "1st", "fc_2nd": "2nd", "fc_3rd": "3rd", "fc_4th": "4th", "fc_podium": "Podium %", "fc_podium_hint": "top-2 finishes", "streak_title": "Streaks & Droughts", "streak_sub": "Longest runs of consecutive wins, and longest dry spells without one", "streak_best_win": "Best win run", "streak_best_dry": "Longest drought", "streak_cur_win": "On a {n}-win run", "streak_cur_dry": "{n} without a win", "streak_none": "Not enough games yet.", "div_title": "Commander Diversity", "div_sub": "One-trick specialists vs restless brewers", "div_decks": "decks", "div_eff": "effective", "div_top": "top deck", "div_brewer": "Brewer", "div_trick": "One-trick", "div_note": "\"Effective\" decks = how many decks a player really spreads across, weighting by how often each is played (a perplexity score) — higher means more variety. \"Top deck\" = the share of their games on their single most-played commander; a high % means they lean on one deck.", "div_none": "Not enough games yet.", "parity_title": "Pod Parity Over Time", "parity_sub": "Spread of win rates across players — a shrinking line means a more balanced pod", "parity_note": "Compared to earlier, the pod is {verdict}.", "parity_steady": "holding steady", "parity_closer": "getting closer", "parity_wider": "spreading apart", "parity_none": "Not enough dated games to chart parity.", "cd_back": "Back to commanders", "cd_title": "Commander Profile", "cd_games": "Games", "cd_winrate": "Win rate", "cd_avgfinish": "Avg finish", "cd_pilots": "Pilots", "cd_piloted_by": "Piloted by", "cd_vs_players": "Against each player", "cd_vs_players_sub": "How this commander finishes versus each opponent at the table", "cd_best_vs": "Beats", "cd_worst_vs": "Struggles against", "cd_finish_spread": "Finish spread", "cd_deck_matchups": "Deck matchups", "cd_deck_matchups_sub": "Best and worst results against specific opposing commanders ({min}+ games)", "cd_ahead": "ahead", "cd_behind": "behind", "cd_of": "of", "cd_in_games": "in {n} games", "cd_no_matchups": "Not enough repeated deck matchups yet to show reliable results.", "cd_by_pilot": "By pilot", "cd_click_hint": "Click a commander card to see its full profile", "cd_vs": "vs", "cd_pilot_wr": "win rate", "cd_best_matchup": "Best matchup", "cd_worst_matchup": "Toughest matchup", "cd_most_faced": "Faced most", "cd_seat": "avg seat", "cd_solrate": "Early Sol Ring", "year_custom": "Custom", "date_from": "From", "date_to": "To", "date_apply": "Apply", "date_clear": "Clear", "date_range_label": "Date range", "date_all_months": "All", "pp_back": "Back to leaderboard", "pp_title": "Player Profile", "pp_games": "Games", "pp_winrate": "Win rate", "pp_avgfinish": "Avg finish", "pp_decks": "Decks", "pp_yoy": "Year on Year", "pp_yoy_sub": "How this player's results have changed each year", "pp_yoy_year": "Year", "pp_yoy_games": "Games", "pp_yoy_wins": "Wins", "pp_yoy_wr": "Win %", "pp_yoy_avg": "Avg finish", "pp_yoy_podium": "Podium %", "pp_trend": "Win Rate Over Time", "pp_trend_sub": "Last {n} games", "pp_finish": "Finish Spread", "pp_rivals": "Rivalries", "pp_rivals_sub": "Record against each opponent — click to dig in", "pp_best_rival": "Best matchup", "pp_worst_rival": "Toughest rival", "pp_seat": "Seat Performance", "pp_seat_sub": "Win rate by turn order", "pp_decks_title": "Decks Piloted", "pp_decks_sub": "Ranked by games played — click for the full commander profile", "pp_decks_sort_games": "Most played", "pp_decks_sort_winrate": "Win rate", "pp_decks_sort_time": "Avg time", "pp_best_deck": "Best deck", "pp_worst_deck": "Weakest deck", "pp_solring": "Early Sol Ring", "pp_best_seat": "Best seat", "ppsol_title": "Sol Ring Impact", "ppsol_sub": "Win rate when he lands an early Sol Ring vs when he doesn't", "ppsol_with": "With Early Sol Ring", "ppsol_without": "Without", "ppsol_swing": "point swing", "ppsol_rate": "Lands an early Sol Ring in {pct}% of his games", "presence_title": "The Presence Effect", "presence_sub": "Does this player's win rate shift depending on who else is at the table?", "presence_pts": "pts", "presence_with": "With him", "presence_without": "Without him", "presence_note": "Comparing win rate in games where an opponent was seated vs not — a correlation, not proof of cause (the rest of the table differs between the two groups too). Needs {min}+ games in both groups to show.", "presence_col_player": "Player", "presence_col_vs": "vs", "presence_col_with": "With %", "presence_col_without": "Without %", "presence_col_delta": "Swing", "presence_none": "Not enough overlapping games yet to measure this.", "presence_insights_sub": "The biggest swings across the whole group — click either name for his profile", "pp_ahead": "ahead", "pp_click_player": "Click a player to see his full profile", "pp_no_year": "No games this period.", "pp_seat_label": "Seat", "pp_overall": "overall", "tab_recent": "Recent Games", "rg_title": "Recent Games", "rg_sub": "The latest matches — newest first", "rg_game": "Game", "rg_min": "min", "rg_no_time": "no time logged", "rg_load_more": "Load more", "rg_showing": "Showing {n} of {total}", "rg_winner": "Winner", "rg_none": "No games to show.", "rg_players_lbl": "Players", "rg_pfilter_tip": "Toggle a player to hide or show every game he sat in", "rg_window_lbl": "Window size", "rg_win_all": "All", "rg_win_custom_ph": "custom", "rg_focus_all": "Showing all {n} games", "rg_focus_window": "Games {from}–{to} of {total} (newest = 1)", "rg_trend_title": "Finishing Positions", "rg_trend_sub": "How each player finished across these {n} games", "rg_trend_none": "Not enough games to chart yet.", "rg_click_hint": "Click any player or commander to see their full profile", "rg_seat": "seat", "rg_sol": "Early Sol Ring", "pace_title": "Commander Pace", "pace_sub": "Which commanders show up in fast games vs slow ones", "pace_help": "Average length of games each commander appeared in, compared to the overall average ({avg}m). Negative = games tend to run faster when this commander is at the table; positive = slower. Based on timed games only.", "pace_fastest": "Fastest tables", "pace_slowest": "Slowest tables", "pace_faster": "faster", "pace_slower": "slower", "pace_avg": "avg game", "pace_games": "timed games", "pace_none": "No timed games to analyse.", "pace_min_note": "Commanders with {min}+ timed games", "pace_vs_avg": "vs average", "color_W": "White", "color_U": "Blue", "color_B": "Black", "color_R": "Red", "color_G": "Green", "color_C": "Colorless", "cs_title": "Color Breakdown", "cs_sub": "How the pod's commander colors perform — respects the year filter above", "cs_bycolor_title": "Win Rate by Color", "cs_bycolor_sub": "Each seat counts toward every color in its commander's identity", "cs_bycount_title": "Mono vs Multicolor", "cs_bycount_sub": "Does adding colors help? Win rate by number of colors", "cs_count_1": "1 (Mono)", "cs_count_2": "2 colors", "cs_count_3": "3 colors", "cs_count_4": "4 colors", "cs_count_5": "5 colors", "cs_seats": "seats", "cs_none": "No color data for these games yet.", "cs_expected": "For reference, an average seat wins ~{n}% in a 4-player game.", "cs_games_short": "g", "pcolor_title": "Color Profile", "pcolor_sub": "Which colors this player gravitates to, and how he does in them", "pcolor_fav": "Favorite color", "pcolor_least": "Least played", "pcolor_most_combo": "Go-to combination", "pcolor_least_combo": "Rarest combination", "pcolor_by_color": "Games by Color", "pcolor_by_color_sub": "Each deck counts toward every color in its identity", "pcolor_combos": "Color Combinations", "pcolor_combos_sub": "Exact identities piloted ({n} distinct)", "pcolor_of_games": "of games", "pcolor_more": "more", "pcolor_by_color_sub2": "Share of this player's games each color appears in, and win rate", "pcolor_combos_sub2": "Share of games by exact identity ({n} distinct) · bar shows the full split", "pcolor_weight": "Color Weight", "pcolor_weight_sub": "Overall color mix — each game split evenly across its colors (sums to 100%)", "cmp_m_tags": "Tags", "cmp_m_help_tags": "Who held each superlative — all-time and year by year. Independent of the year filter above.", "nav_overview": "Overview", "nav_games": "Games", "nav_players": "Players", "nav_insights": "Insights", "hl_lastgame": "Last game", "fin_view_chart": "Chart", "fin_view_table": "Table", "search_ph": "Search players & commanders…", "search_none": "No matches for \"{q}\"", "search_tip": "Press / anywhere to search", "scope_ind": "All-time & year by year — independent of the time scope", "rg_pfilter_scope": "With a player filter active, the list searches the entire history — beyond the selected time scope — so the window can always fill.", "scope_label": "Time scope", "menu_more": "More", "gw_title": "Game Window", "gw_sub": "Pick who's at the table and slide through history — everything on this page follows this window", "impact_title": "Recent Impact", "impact_sub": "Notable things the last few games changed — streaks, standings, rivalries, first-time decks", "impact_slider_lbl": "Recent games", "impact_focus": "Based on the last {n} {games}", "impact_none": "Not enough games yet to measure recent impact.", "impact_quiet": "Nothing stood out in the last {n} {games} — just business as usual.", "impact_ev_rank": "{name} moved from #{from} to #{to} in the standings.", "impact_ev_streak_win": "{name} is on a {n}-game win streak.", "impact_ev_streak_dry": "{name} is on a {n}-game losing streak.", "impact_ev_streak_snap_win": "{name}'s {n}-game win streak came to an end.", "impact_ev_streak_snap_dry": "{name} broke his {n}-game losing streak. Congratulations!", "impact_ev_rivalry_tie": "{a} and {b} are now tied in their head-to-head ({rec}).", "impact_ev_rivalry_flip": "{leader} took the head-to-head lead over {other} ({rec}).", "impact_ev_commander": "{name} piloted {commander} for the first time this period{outcome}", "impact_outcome_win": " — and won!", "impact_outcome_other": ", finishing #{rank}.", "impact_ev_commander_first_win": "{name} banked his first-ever win with {commander}!", "impact_ev_commander_first_win_year": "{name} banked his first {year} win with {commander}!", "impact_ev_commander_first_win_period": "{name} banked his first win with {commander} this period!", "impact_ev_commander_first_loss": "{name}'s {commander} was undefeated at {n}-0 — not anymore.", "impact_ev_commander_first_loss_year": "{name}'s {commander} was undefeated at {n}-0 in {year} — not anymore.", "impact_ev_commander_first_loss_period": "{name}'s {commander} was undefeated at {n}-0 this period — not anymore.", "cd_news_title": "Commander News", "cd_news_sub": "Notable moments from this commander's playtime — new pilots, streaks, and statement wins.", "cd_news_focus_partial": "Based on the last {n} of {total} games", "cd_news_focus_all": "Based on all {n} games", "cd_news_quiet": "Nothing stood out yet — just steady play so far.", "md_news_title": "Rivalry News", "md_news_sub": "Notable moments from their shared games — head-to-head lead changes and statement wins.", "md_news_focus_partial": "Based on their last {n} of {total} shared games", "md_news_focus_all": "Based on all {n} shared games", "md_news_quiet": "Nothing stood out yet — just steady play so far.", "cd_ev_debut": "{name} picked up this commander for the first time{outcome}", "cd_ev_debut_year": "{name} picked up this commander for the first time in {year}{outcome}", "cd_ev_debut_period": "{name} picked up this commander for the first time this period{outcome}", "cd_ev_sweep_1": "This commander swept the entire table, piloted by {name}.", "cd_ev_sweep_2": "A clean sweep for this commander — {name} took the whole table down at once.", "cd_ev_pace_reallyfast": "This commander closed out a win in just {mins} minutes, piloted by {name}.", "cd_ev_pace_fast": "A brisk {mins}-minute win for this commander, piloted by {name}.", "cd_ev_pace_long": "This commander ground out a {mins}-minute win with {name} at the helm.", "cd_ev_pace_verylong": "This commander outlasted the table in a {mins}-minute marathon, piloted by {name}.", "cd_ev_comeback_win_1": "{name} dusted off this commander after {n} games on the shelf — and beat {opponent} with it.", "cd_ev_comeback_win_2": "Back after {n} games away, {name} piloted this commander straight to a win over {opponent}.", "cd_ev_comeback_win_3": "{name} dug this deck out of the sleeve box and beat {opponent} on the very first try.", "cd_ev_comeback_win_4": "Turns out {n} games of rust didn't matter — {name} beat {opponent} anyway.", "cd_ev_comeback_win_5": "Fresh off the shelf after {n} games away, this deck still had it — {name} took down {opponent}.", "cd_ev_comeback_loss_1": "{name} dusted off this commander after {n} games on the shelf, but {opponent} sent it right back.", "cd_ev_comeback_loss_2": "Back after {n} games away, {name} couldn't get past {opponent} this time.", "cd_ev_comeback_loss_3": "{name} dug this deck out of the sleeve box, and {opponent} reminded them why it was shelved.", "cd_ev_comeback_loss_4": "Turns out {n} games of rust does matter — {opponent} took this one from {name}.", "cd_ev_comeback_loss_5": "Fresh off the shelf after {n} games away, but {opponent} was fresher — {name} fell short.", "cd_ev_recap": "{name} piloted this commander{outcome}", "impact_tag_recap": "Game Log", "pp_news_title": "Player News", "pp_nav_presence": "Presence Effect", "pp_nav_meta": "Commander Choices", "pp_news_sub": "Notable moments from this player's games — new decks, streaks, and statement wins.", "pp_ev_recap": "{name} piloted {commander}{outcome}", "pp_ev_comeback_win_1": "{name} returns to the table after {n} games away — and beats {opponent}.", "pp_ev_comeback_win_2": "Back after {n} games away, {name} wastes no time beating {opponent}.", "pp_ev_comeback_loss_1": "{name} returns to the table after {n} games away, but {opponent} gets the better of it.", "pp_ev_comeback_loss_2": "Back after {n} games away, {name} can't quite get past {opponent} this time.", "cd_ev_streak_win": "This commander is riding a {n}-game win streak.", "cd_ev_streak_dry": "This commander hasn't won in its last {n} games.", "cd_ev_streak_snap_win": "The {n}-game win streak just ended.", "cd_ev_streak_snap_dry": "Back in the win column after {n} games without one. Congratulations!", "impact_ev_sweep_1": "Of course {winner} beat everyone at the same time. Totally expected.", "impact_ev_sweep_2": "{winner} apparently couldn't pick just one victim, so he took out {losers} together.", "impact_ev_sweep_3": "Clean sweep! {winner} took down {losers} in the same breath.", "impact_ev_sweep_4": "Well played, {winner} — a full table wipe, {losers} included.", "impact_ev_sweep_5": "{winner} ended {losers}'s games at exactly the same moment.", "impact_tag_rank": "Standings", "impact_tag_hot": "Hot Streak", "impact_tag_cold": "Cold Streak", "impact_tag_streak_end": "Streak Ended", "impact_tag_turnaround": "Turnaround", "impact_tag_rivalry": "Rivalry", "impact_tag_commander": "First Time", "impact_tag_first_win": "First Win", "impact_tag_first_loss": "First Loss", "impact_tag_sweep": "Clean Sweep", "impact_day_game": "Game {n}", "impact_ev_trade_endboss": "{new} just dethroned {old} as the pod's Endboss.", "impact_ev_trade_badluck": "{new} has inherited {old}'s Bad Luck streak — condolences.", "impact_ev_trade_grinder": "{new} out-grinded {old} to become the new Grinder.", "impact_ev_trade_bench": "{new} is riding the bench harder than {old} these days.", "impact_ev_trade_podium": "{new} bumped {old} off the Podium Regular spot.", "impact_ev_trade_solking": "{new} seized the Sol Ring King crown from {old}.", "impact_ev_trade_brewer": "{new} is brewing more decks than {old} now — new Brewer in town.", "impact_ev_trade_onetrick": "{new} took the One-Trick title from {old}.", "impact_ev_trade_slowpoke": "{new} out-slowpoked {old} for the new Slowpoke record.", "impact_ev_trade_speed": "{new} stole the Speedrunner crown from {old}.", "impact_ev_trade_streaker": "{new} broke {old}'s Hot Hand record for longest win streak.", "impact_ev_trade_rentner": "{new} has taken over as Rentner from {old}. Our condolences.", "impact_ev_trade_executioner": "{new} out-swept {old} for the Executioner title.", "impact_ev_trade_onfire": "{new} is On Fire now — {old}'s heater just ended.", "impact_tag_comeback": "Comeback", "impact_tag_matchup": "Matchup", "impact_tag_pace_reallyfast": "Really Fast", "impact_tag_pace_fast": "Fast Game", "impact_tag_pace_long": "Long Game", "impact_tag_pace_verylong": "Very Very Long", "impact_ev_pace_reallyfast_1": "{winner} closed it out in just {mins} minutes. Blink and you'd have missed it.", "impact_ev_pace_reallyfast_2": "{mins} minutes and it was already over — {winner} doesn't mess around.", "impact_ev_pace_fast_1": "{winner} wrapped it up in a brisk {mins} minutes.", "impact_ev_pace_fast_2": "A quick one — {winner} took it down in {mins} minutes.", "impact_ev_pace_long_1": "{winner} finally closed it out after a {mins}-minute grind.", "impact_ev_pace_long_2": "{mins} minutes in the making, but {winner} got there.", "impact_ev_pace_verylong_1": "{mins} minutes?! {winner} outlasted everyone in an absolute marathon.", "impact_ev_pace_verylong_2": "A {mins}-minute epic — {winner} was still standing at the end.", "impact_ev_pace_accent_reallyfast": "And it was over in just {mins} minutes.", "impact_ev_pace_accent_fast": "All in a brisk {mins} minutes.", "impact_ev_pace_accent_long": "After a {mins}-minute grind.", "impact_ev_pace_accent_verylong": "Somehow it still took {mins} minutes.", "impact_ev_solring_accent": "He also had an early Sol Ring going.", "impact_ev_comeback_1": "Look who decided to show up — {name} is back after {n} weeks away.", "impact_ev_comeback_2": "{name} returns from the shadow realm after {n} weeks. Welcome back, stranger.", "impact_ev_comeback_3": "Remember {name}? {n} weeks later, he remembered us too.", "games_ind": "Entire history — independent of the time scope", "tag_guest": "Guest", "tag_guest_d": "Fewer than 15 games in this period — not enough to earn a title", "iw_sub": "Focus every chart below on the most recent games — within the current time scope. Leave it on All for the full picture.", "iw_focus": "Last {n} of {total} games in scope", "iw_focus_all": "All {n} games in scope"}};
 const DEFAULT_YEAR = "2026";
 const lang = 'en';
 
@@ -2433,7 +2447,7 @@ function computeGameStory(windowGames){
     }
     if(winner.sol===1) html+=' '+t('impact_ev_solring_accent');
     const di=dayIndexInfo(g);
-    events.push({type, tagKey, weight:1, date:g.date, dayIndex:di&&di.index, dayTotal:di&&di.total, winner:winner.player, winnerCommander:winner.commander, html});
+    events.push({type, tagKey, weight:1, date:g.date, dayIndex:di&&di.index, dayTotal:di&&di.total, winner:winner.player, winnerCommander:winner.commander, game:g, html});
   });
   return events;
 }
@@ -3006,12 +3020,18 @@ function computeCommanderDetail(cmdName){
 // players — so no new copy is needed for either variant. Gated at CMD_MATCHUP_MIN games (the
 // same floor already used to decide whether a deck matchup is even shown elsewhere on this
 // page) so a 1-2 game sample can't flip back and forth every render.
-function commanderMatchupTrend(cmdName, sorted, beforeGames, windowGames, otherOf){
+// Fully generic version of the two-name matchup-trend detector: `mineOf`/`mineLabel` identify
+// "my" seat in a game (a fixed commander, or a fixed player), `otherOf` extracts the opponent
+// label to compare against (a commander or a player). commanderMatchupTrend() below is a thin
+// wrapper kept for its two existing call sites; Player News uses this directly for player-vs-
+// player. Each event carries `game:g` so callers can mark that game "covered" (no separate
+// Game Recap needed for a date that already got a matchup story).
+function matchupTrend(mineLabel, mineOf, sorted, beforeGames, windowGames, otherOf){
   const events=[];
   const recordOf=(games, otherLabel)=>{
     let mine=0, other=0, ties=0;
     games.forEach(g=>{
-      const me=g.seats.find(s=>s.commander===cmdName);
+      const me=g.seats.find(s=>mineOf(s)===mineLabel);
       if(!me) return;
       const opp=g.seats.find(s=>s!==me && otherOf(s)===otherLabel);
       if(!opp) return;
@@ -3021,12 +3041,12 @@ function commanderMatchupTrend(cmdName, sorted, beforeGames, windowGames, otherO
   };
   const seen=new Set();
   windowGames.forEach(g=>{
-    const me=g.seats.find(s=>s.commander===cmdName);
+    const me=g.seats.find(s=>mineOf(s)===mineLabel);
     if(!me) return;
     g.seats.forEach(opp=>{
       if(opp===me) return;
       const label=otherOf(opp);
-      if(!label || label===cmdName || seen.has(label)) return;
+      if(!label || label===mineLabel || seen.has(label)) return;
       seen.add(label);
       const before=recordOf(beforeGames,label), after=recordOf(sorted,label);
       if(after.mine+after.other+after.ties < CMD_MATCHUP_MIN) return;
@@ -3034,16 +3054,19 @@ function commanderMatchupTrend(cmdName, sorted, beforeGames, windowGames, otherO
       const bs=statusOf(before), as=statusOf(after);
       if(bs==null||as==null||bs===as) return;
       const di=dayIndexInfo(g);
-      const stamp={type:'matchup', tagKey:'impact_tag_matchup', date:g.date, dayIndex:di&&di.index, dayTotal:di&&di.total};
+      const stamp={type:'matchup', tagKey:'impact_tag_matchup', date:g.date, dayIndex:di&&di.index, dayTotal:di&&di.total, game:g};
       if(as==='tie'){
-        events.push({...stamp, weight:5, html:t('impact_ev_rivalry_tie',{a:`<b>${esc(cmdName)}</b>`,b:`<b>${esc(label)}</b>`,rec:`${after.mine}-${after.other}`})});
+        events.push({...stamp, weight:5, html:t('impact_ev_rivalry_tie',{a:`<b>${esc(mineLabel)}</b>`,b:`<b>${esc(label)}</b>`,rec:`${after.mine}-${after.other}`})});
       } else {
-        const leader=as==='a'?cmdName:label, other=as==='a'?label:cmdName, ls=as==='a'?after.mine:after.other, os=as==='a'?after.other:after.mine;
+        const leader=as==='a'?mineLabel:label, other=as==='a'?label:mineLabel, ls=as==='a'?after.mine:after.other, os=as==='a'?after.other:after.mine;
         events.push({...stamp, weight:6, html:t('impact_ev_rivalry_flip',{leader:`<b>${esc(leader)}</b>`,other:`<b>${esc(other)}</b>`,rec:`${ls}-${os}`})});
       }
     });
   });
   return events;
+}
+function commanderMatchupTrend(cmdName, sorted, beforeGames, windowGames, otherOf){
+  return matchupTrend(cmdName, s=>s.commander, sorted, beforeGames, windowGames, otherOf);
 }
 function computeCommanderNews(cmdName){
   const sorted=gamesForYear().filter(g=>g.seats.some(s=>s.commander===cmdName)).slice().sort((a,b)=>{
@@ -3162,8 +3185,11 @@ function computeCommanderNews(cmdName){
   // PLAYERS — both via the shared commanderMatchupTrend() detector above. "Everything we have
   // about this commander" per direct request: deck matchups were previously only shown as
   // static best/worst callouts elsewhere on this page, never as a "just changed" moment.
-  events.push(...commanderMatchupTrend(cmdName, sorted, beforeGames, windowGames, s=>s.commander));
-  events.push(...commanderMatchupTrend(cmdName, sorted, beforeGames, windowGames, s=>s.player));
+  [...commanderMatchupTrend(cmdName, sorted, beforeGames, windowGames, s=>s.commander),
+   ...commanderMatchupTrend(cmdName, sorted, beforeGames, windowGames, s=>s.player)].forEach(e=>{
+    events.push(e);
+    if(e.game) coveredGames.add(e.game);
+  });
 
   // commander comeback — a pilot picks THIS specific commander back up after a real-world gap
   // (same COMEBACK_MIN_DAYS threshold as Recent Impact's pod-wide Comeback), reporting the
@@ -3367,11 +3393,14 @@ function renderCommanderDetail(){
           ${e.date?`<span class="impact-event-date">${localizedGameDate(e.date)}</span>`:''}
         </div>`).join('')
       : `<div class="empty">${t('cd_news_quiet')}</div>`;
-    newsHtml=`<div class="cd-card" style="margin-top:18px;margin-bottom:18px">
+    newsHtml=`<div class="cd-card news-card" style="margin-top:18px;margin-bottom:18px">
+      <button class="news-card-toggle" type="button" aria-label="Toggle section"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg></button>
       <div class="cd-card-hd">${t('cd_news_title')}</div>
       <div class="cd-card-sub">${t('cd_news_sub')}</div>
-      <div class="rg-focus" style="margin-top:2px">${focusHtml}</div>
-      <div class="impact-feed">${eventsHtml}</div>
+      <div class="news-card-body">
+        <div class="rg-focus" style="margin-top:2px">${focusHtml}</div>
+        <div class="impact-feed">${eventsHtml}</div>
+      </div>
     </div>`;
   }
 
@@ -3608,6 +3637,147 @@ function computePlayerColorProfile(deckArr){
     distinctCombos:combos.length};
 }
 
+// ===== Player News — the same highlights-feed idea as Recent Impact/Commander News/Rivalry
+// News, applied per-player, per direct request. Same fixed "last 8 (or fewer)" window as the
+// other two, and the same event vocabulary wherever it transfers cleanly:
+function computePlayerNews(playerName){
+  const sorted=gamesForYear().filter(g=>g.seats.some(s=>s.player===playerName)).slice().sort((a,b)=>{
+    const da=a.date||'', db=b.date||'';
+    if(da!==db) return da<db?1:-1;
+    return (b.order||0)-(a.order||0);
+  });
+  if(!sorted.length) return null;
+  const WINDOW=Math.min(8, sorted.length);
+  const windowGames=sorted.slice(0, WINDOW);
+  const windowSet=new Set(windowGames);
+  const beforeGames=sorted.filter(g=>!windowSet.has(g));
+  const events=[];
+  const coveredGames=new Set();
+
+  // 1) this player's own win/loss streak — reuses the shared computeStreaksForGames (scoped to
+  // just this one player) rather than a local walker, and Recent Impact's exact player-streak
+  // wording (impact_ev_streak_*), which already takes {name}.
+  const streakAfter=computeStreaksForGames(sorted,[playerName])[0]||{curWin:0,curDry:0};
+  const streakBefore=computeStreaksForGames(beforeGames,[playerName])[0]||{curWin:0,curDry:0};
+  const latestDate=windowGames[0] && windowGames[0].date;
+  if(streakAfter.curWin>=2){
+    events.push({type:'streak-up', tagKey:'impact_tag_hot', weight:streakAfter.curWin, date:latestDate, html:t('impact_ev_streak_win',{name:`<b>${esc(playerName)}</b>`,n:streakAfter.curWin})});
+  } else if(streakAfter.curDry>=2){
+    events.push({type:'streak-down', tagKey:'impact_tag_cold', weight:streakAfter.curDry, date:latestDate, html:t('impact_ev_streak_dry',{name:`<b>${esc(playerName)}</b>`,n:streakAfter.curDry})});
+  } else if(streakBefore.curWin>=2 && streakAfter.curWin<streakBefore.curWin){
+    events.push({type:'streak-down', tagKey:'impact_tag_streak_end', weight:streakBefore.curWin, date:latestDate, html:t('impact_ev_streak_snap_win',{name:`<b>${esc(playerName)}</b>`,n:streakBefore.curWin})});
+  } else if(streakBefore.curDry>=2 && streakAfter.curDry<streakBefore.curDry){
+    events.push({type:'streak-up', tagKey:'impact_tag_turnaround', weight:streakBefore.curDry, date:latestDate, html:t('impact_ev_streak_snap_dry',{name:`<b>${esc(playerName)}</b>`,n:streakBefore.curDry})});
+  }
+
+  // 2) commander debuts + first win/first loss — same cmdTally walk as Commander News, just
+  // keyed by commander since the player is fixed here. Reuses Recent Impact's exact debut/
+  // first-win/first-loss keys (already scope-aware for ever/year/period) verbatim.
+  const scopeKind = customRange ? 'period' : (curYear==='all' ? 'ever' : 'year');
+  const tally={};
+  beforeGames.forEach(g=>{
+    const me=g.seats.find(s=>s.player===playerName);
+    const tk=tally[me.commander]||(tally[me.commander]={games:0,wins:0});
+    tk.games++; if(me.rank===1)tk.wins++;
+  });
+  windowGames.slice().reverse().forEach(g=>{
+    const me=g.seats.find(s=>s.player===playerName);
+    const tk=tally[me.commander]||(tally[me.commander]={games:0,wins:0});
+    const gamesBefore=tk.games, winsBefore=tk.wins;
+    if(gamesBefore===0){
+      const outcome = me.rank===1 ? t('impact_outcome_win') : t('impact_outcome_other',{rank:me.rank});
+      events.push({type:'commander', tagKey:'impact_tag_commander', weight:1, date:g.date,
+        html:t('impact_ev_commander',{name:`<b>${esc(playerName)}</b>`,commander:esc(me.commander),outcome})});
+      coveredGames.add(g);
+    } else if(winsBefore===0 && me.rank===1){
+      const key=scopeKind==='ever'?'impact_ev_commander_first_win':scopeKind==='year'?'impact_ev_commander_first_win_year':'impact_ev_commander_first_win_period';
+      events.push({type:'commander-first-win', tagKey:'impact_tag_first_win', weight:2, date:g.date,
+        html:t(key,{name:`<b>${esc(playerName)}</b>`,commander:esc(me.commander),year:curYear})});
+      coveredGames.add(g);
+    } else if(winsBefore===gamesBefore && me.rank!==1){
+      const key=scopeKind==='ever'?'impact_ev_commander_first_loss':scopeKind==='year'?'impact_ev_commander_first_loss_year':'impact_ev_commander_first_loss_period';
+      events.push({type:'commander-first-loss', tagKey:'impact_tag_first_loss', weight:2, date:g.date,
+        html:t(key,{name:`<b>${esc(playerName)}</b>`,commander:esc(me.commander),n:gamesBefore,year:curYear})});
+      coveredGames.add(g);
+    }
+    tk.games++; if(me.rank===1)tk.wins++;
+  });
+
+  // 3) Game Story (Clean Sweep / notable pace / early Sol Ring), filtered to games THIS player
+  // won — unlike Commander News, naming this player as protagonist (and who they beat) is
+  // exactly the point on a player-scoped feed, so the pod-wide computeGameStory() wording is
+  // reused as-is, unlike the commander-specific rewrite.
+  computeGameStory(windowGames).filter(e=>e.winner===playerName).forEach(e=>{
+    events.push(e);
+    coveredGames.add(e.game);
+  });
+
+  // 4) this player vs each opposing PLAYER — head-to-head lead changes/ties, via the shared
+  // matchupTrend() detector (see above).
+  matchupTrend(playerName, s=>s.player, sorted, beforeGames, windowGames, s=>s.player).forEach(e=>{
+    events.push(e);
+    coveredGames.add(e.game);
+  });
+
+  // 5) comeback — this player returning to the table (any commander) after a real-world gap.
+  // Same COMEBACK_MIN_DAYS/COMEBACK_MIN_GAMES floors as Commander News, for the same reasons
+  // (see there), but new wording since "dusted off this commander" doesn't fit a whole-player
+  // return — names the closest opposing PLAYER instead of an opposing commander.
+  const COMEBACK_MIN_DAYS=28, COMEBACK_MIN_GAMES=8;
+  const PP_COMEBACK_WIN_KEYS=['pp_ev_comeback_win_1','pp_ev_comeback_win_2'];
+  const PP_COMEBACK_LOSS_KEYS=['pp_ev_comeback_loss_1','pp_ev_comeback_loss_2'];
+  const podGames=gamesForYear();
+  let prevDate=null;
+  sorted.slice().reverse().forEach(g=>{
+    if(!g.date){ return; }
+    const me=g.seats.find(s=>s.player===playerName);
+    const gapDays=prevDate!=null?Math.round((ymdToDate(g.date)-ymdToDate(prevDate))/86400000):null;
+    if(gapDays!=null && gapDays>=COMEBACK_MIN_DAYS && windowSet.has(g)){
+      const gamesBetween=podGames.filter(x=>x.date>prevDate && x.date<g.date).length;
+      if(gamesBetween>=COMEBACK_MIN_GAMES){
+        const pick=arr=>arr[(g.num!=null?g.num:0)%arr.length];
+        const di=dayIndexInfo(g);
+        let html;
+        if(me.rank===1){
+          const runnerUp=g.seats.filter(s=>s!==me).sort((a,b)=>a.rank-b.rank)[0];
+          html=t(pick(PP_COMEBACK_WIN_KEYS),{name:`<b>${esc(playerName)}</b>`,n:gamesBetween,opponent:esc(runnerUp?runnerUp.player:'the table')});
+        } else {
+          const winner=g.seats.find(s=>s.rank===1);
+          html=t(pick(PP_COMEBACK_LOSS_KEYS),{name:`<b>${esc(playerName)}</b>`,n:gamesBetween,opponent:esc(winner?winner.player:'the table')});
+        }
+        events.push({type:'comeback', tagKey:'impact_tag_comeback', weight:gapDays, date:g.date, dayIndex:di&&di.index, dayTotal:di&&di.total, html});
+        coveredGames.add(g);
+      }
+    }
+    prevDate=g.date;
+  });
+
+  // 6) Game Recap fallback — every remaining game in the window that didn't earn a dedicated
+  // event still gets a plain factual line (mentions which commander, since a player can pilot
+  // many different ones — unlike Commander News's recap, the commander name IS the useful part
+  // here). Same "don't show nothing for the most recent game" reasoning as Commander News.
+  windowGames.forEach(g=>{
+    if(coveredGames.has(g)) return;
+    const me=g.seats.find(s=>s.player===playerName);
+    if(!me) return;
+    const outcome = me.rank===1 ? t('impact_outcome_win') : t('impact_outcome_other',{rank:me.rank});
+    const di=dayIndexInfo(g);
+    events.push({type:'recap', tagKey:'impact_tag_recap', weight:0, date:g.date, dayIndex:di&&di.index, dayTotal:di&&di.total,
+      html:t('pp_ev_recap',{name:`<b>${esc(playerName)}</b>`,commander:esc(me.commander),outcome})});
+  });
+
+  events.sort((a,b)=>{
+    const da=a.date||'', db=b.date||'';
+    if(da!==db) return da<db?1:-1;
+    if((a.dayIndex||0)!==(b.dayIndex||0)) return (b.dayIndex||0)-(a.dayIndex||0);
+    const order={sweep:5,matchup:5,comeback:4,'streak-up':3,'streak-down':3,pace:3,'commander-first-win':2,'commander-first-loss':2,commander:1,recap:0};
+    if(order[a.type]!==order[b.type]) return order[b.type]-order[a.type];
+    return b.weight-a.weight;
+  });
+  const dated=windowGames.filter(g=>g.date).map(g=>g.date).sort();
+  return {n:WINDOW, total:sorted.length, events, from:dated[0]||null, to:dated[dated.length-1]||null};
+}
+
 let ppName=null;
 let deckSortMode='games'; // 'games' | 'winrate' | 'time'
 function openPlayerDetail(name){ navigate('player/'+encodeURIComponent(name)); }
@@ -3666,6 +3836,7 @@ function renderPlayerDetail(){
       <td><span class="fc-podium">${y.podium}%</span></td>
     </tr>`).join('');
     yoyHtml=`
+      <div class="sec" id="sec-pp-yoy">
       <div class="section-head" style="margin-top:0;margin-bottom:14px"><h2 style="font-size:22px">${t('pp_yoy')}</h2><span class="hint">${t('pp_yoy_sub')} · ${t('scope_ind')}</span></div>
       <div class="pp-yoy-grid">
         <div class="cd-card"><div class="yoy-chart">${bars}</div></div>
@@ -3675,6 +3846,7 @@ function renderPlayerDetail(){
             <tbody>${rows}</tbody>
           </table>
         </div>
+      </div>
       </div>`;
   }
 
@@ -3763,7 +3935,7 @@ function renderPlayerDetail(){
       ? `<div class="ppsol-swing ${swing>=0?'up':'down'}">${swing>=0?'+':''}${swing} ${t('ppsol_swing')}</div>`
       : '';
     const rateTxt = `<div class="ppsol-rate">${t('ppsol_rate',{pct:s.rate})}</div>`;
-    solHtml=`<div class="cd-card" style="margin-top:18px">
+    solHtml=`<div class="sec cd-card" id="sec-pp-sol" style="margin-top:18px">
       <div class="cd-card-hd">${t('ppsol_title')}</div>
       <div class="cd-card-sub">${t('ppsol_sub')}</div>
       <div class="vbar-chart" style="height:200px">${bars}</div>
@@ -3788,7 +3960,7 @@ function renderPlayerDetail(){
         </div>
       </div>`;
     }).join('');
-    presenceHtml=`<div class="cd-card" style="margin-top:18px">
+    presenceHtml=`<div class="sec cd-card" id="sec-pp-presence" style="margin-top:18px">
       <div class="cd-card-hd">${t('presence_title')}</div>
       <div class="cd-card-sub">${t('presence_sub')}</div>
       <div class="pe-list">${rows}</div>
@@ -3802,7 +3974,7 @@ function renderPlayerDetail(){
     const cmdMetaData=computePlayerCommanderMeta(d.name);
     const chart=commanderMetaChartHtml(cmdMetaData);
     if(chart){
-      cmdMetaHtml=`<div class="cd-card" style="margin-top:18px">
+      cmdMetaHtml=`<div class="sec cd-card" id="sec-pp-meta" style="margin-top:18px">
         <div class="cd-card-hd">${t('meta_title')}</div>
         <div class="cd-card-sub">${t('meta_sub')}</div>
         ${chart}
@@ -3899,7 +4071,7 @@ function renderPlayerDetail(){
       </div>`;
     };
     colorProfileHtml=`
-      <div style="margin-top:24px">
+      <div class="sec" id="sec-pp-color" style="margin-top:24px">
         <div class="section-head" style="margin-bottom:14px"><h2 style="font-size:22px">${t('pcolor_title')}</h2><span class="hint">${t('pcolor_sub')}</span></div>
         <div class="pcolor-callouts">
           ${callout('pcolor_fav', cp.favorite, false)}
@@ -3925,6 +4097,50 @@ function renderPlayerDetail(){
       </div>`;
   }
 
+  // Player News — see computePlayerNews() for the event vocabulary. Inserted between Win Rate
+  // Over Time and Decks Piloted per direct request.
+  const news=computePlayerNews(d.name);
+  let newsHtml='';
+  if(news){
+    const focusTxt = news.total>news.n ? t('cd_news_focus_partial',{n:news.n,total:news.total}) : t('cd_news_focus_all',{n:news.n});
+    const focusHtml = news.from&&news.to
+      ? `<span class="rg-focus-main">${focusTxt}</span><span class="rg-focus-dates">${localizedGameDate(news.from)} – ${localizedGameDate(news.to)}</span>`
+      : `<span class="rg-focus-main">${focusTxt}</span>`;
+    const eventsHtml = news.events.length
+      ? news.events.map(e=>`<div class="impact-event ${e.type}">
+          <span class="impact-event-tag">${t(e.tagKey)}</span>
+          <span class="impact-event-text">${e.html}</span>
+          ${e.date?`<span class="impact-event-date">${localizedGameDate(e.date)}</span>`:''}
+        </div>`).join('')
+      : `<div class="empty">${t('cd_news_quiet')}</div>`;
+    newsHtml=`<div class="sec cd-card news-card" id="sec-pp-news" style="margin-top:18px">
+      <button class="news-card-toggle" type="button" aria-label="Toggle section"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg></button>
+      <div class="cd-card-hd">${t('pp_news_title')}</div>
+      <div class="cd-card-sub">${t('pp_news_sub')}</div>
+      <div class="news-card-body">
+        <div class="rg-focus" style="margin-top:2px">${focusHtml}</div>
+        <div class="impact-feed">${eventsHtml}</div>
+      </div>
+    </div>`;
+  }
+
+  // Jump-to-section subnav — same pattern used on Games/Players/Insights, added here per
+  // direct request. Only lists sections that actually rendered this pass (several are
+  // conditional on the player having that kind of data at all).
+  const pnavItems=[
+    {id:'sec-pp-yoy', label:t('pp_yoy'), show:!!yoyHtml},
+    {id:'sec-pp-trend', label:t('pp_trend'), show:true},
+    {id:'sec-pp-news', label:t('pp_news_title'), show:!!newsHtml},
+    {id:'sec-pp-rivals', label:t('pp_rivals'), show:true},
+    {id:'sec-pp-seat', label:t('pp_seat'), show:d.seats.length>0},
+    {id:'sec-pp-sol', label:t('ppsol_title'), show:!!solHtml},
+    {id:'sec-pp-presence', label:t('pp_nav_presence'), show:!!presenceHtml},
+    {id:'sec-pp-color', label:t('pcolor_title'), show:!!colorProfileHtml},
+    {id:'sec-pp-meta', label:t('pp_nav_meta'), show:!!cmdMetaHtml},
+    {id:'sec-pp-decks', label:t('pp_decks_title'), show:true},
+  ].filter(x=>x.show);
+  const pnavHtml = pnavItems.length ? `<nav class="subnav" data-spy="v-player">${pnavItems.map((x,i)=>`<a class="snav${i===0?' on':''}" data-target="${x.id}">${x.label}</a>`).join('')}</nav>` : '';
+
   cont.innerHTML=`
     ${backBtn}
     <div class="cd-header${favCols.length?' themed':''}">
@@ -3939,9 +4155,11 @@ function renderPlayerDetail(){
       <div class="cd-stats">${heroStats}</div>
     </div>
 
+    ${pnavHtml}
+
     ${yoyHtml}
 
-    <div class="pp-two-col" style="margin-top:18px">
+    <div class="sec pp-two-col" id="sec-pp-trend" style="margin-top:18px">
       ${trendHtml?`<div class="pp-col-main">${trendHtml}</div>`:''}
       <div class="pp-col-side">
         <div class="section-head" style="margin-bottom:14px"><h2 style="font-size:22px">${t('pp_finish')}</h2></div>
@@ -3952,7 +4170,9 @@ function renderPlayerDetail(){
       </div>
     </div>
 
-    <div class="cd-grid2" style="margin-top:18px">
+    ${newsHtml}
+
+    <div class="sec cd-grid2" id="sec-pp-rivals" style="margin-top:18px">
       <div class="cd-card">
         <div class="cd-card-hd">${t('pp_rivals')}</div>
         <div class="cd-card-sub">${t('pp_rivals_sub')}</div>
@@ -3964,7 +4184,7 @@ function renderPlayerDetail(){
       </div>
     </div>
 
-    ${d.seats.length?`<div class="cd-card" style="margin-top:18px">
+    ${d.seats.length?`<div class="sec cd-card" id="sec-pp-seat" style="margin-top:18px">
       <div class="cd-card-hd">${t('pp_seat')}</div>
       <div class="cd-card-sub">${t('pp_seat_sub')}</div>
       <div class="vbar-chart" style="height:200px">${seatBars}</div>
@@ -3978,7 +4198,7 @@ function renderPlayerDetail(){
 
     ${cmdMetaHtml}
 
-    <div style="margin-top:24px">
+    <div class="sec" id="sec-pp-decks" style="margin-top:24px">
       <div class="section-head" style="margin-bottom:14px"><h2 style="font-size:22px">${t('pp_decks_title')}</h2><span class="hint">${t('pp_decks_sub')}</span></div>
       <div class="h2h-toggle" id="deckSortToggle" style="margin-bottom:14px">
         <button class="${deckSortMode==='games'?'on':''}" data-ds="games">${t('pp_decks_sort_games')}</button>
@@ -3989,6 +4209,20 @@ function renderPlayerDetail(){
     </div>
   `;
   $('#ppBack').addEventListener('click',closePlayerDetail);
+  // This subnav is built fresh into innerHTML on every render, so it never existed when the
+  // one-time global initSubnavs() ran at page load — bind its click-to-scroll here instead.
+  // The scroll-spy highlighting itself (updateSubnavSpy) is scroll-driven and DOM-agnostic, so
+  // it needs no equivalent re-binding.
+  cont.querySelectorAll('.subnav .snav').forEach(a=>{
+    a.addEventListener('click',()=>{
+      const el=document.getElementById(a.dataset.target);
+      if(el)el.scrollIntoView({behavior:'smooth',block:'start'});
+    });
+  });
+  // Pill count varies per player (several sections are conditional), so the overflow state
+  // has to be re-checked on every render, not just once at load — applyRouteVisibility()'s
+  // call runs too early here (before this innerHTML swap), so this is the one that matters.
+  updateSubnavFades();
   cont.querySelectorAll('#deckSortToggle button').forEach(b=>{
     b.addEventListener('click',()=>{ deckSortMode=b.dataset.ds; renderPlayerDetail(); });
   });
@@ -5361,6 +5595,10 @@ function applyRouteVisibility(){
   const active=HUBS.includes(ROUTE.view)?ROUTE.view:DETAIL_PARENT[ROUTE.view];
   document.querySelectorAll('[data-v]').forEach(b=>b.classList.toggle('active',b.dataset.v===active));
   updateSubnavSpy();
+  // A hidden view's subnav measures 0/0 for scrollWidth/clientWidth (no layout while
+  // display:none), so the has-overflow check from initSubnavs()'s one-time call at load can't
+  // have caught tabs that weren't the active one yet — re-check now that this view is visible.
+  updateSubnavFades();
 }
 function syncRouteState(){
   ppName=ROUTE.view==='player'?ROUTE.params[0]:null;
@@ -5592,6 +5830,22 @@ function initSubnavs(){
     if(ticking)return;ticking=true;
     requestAnimationFrame(()=>{ticking=false;updateSubnavSpy();});
   },{passive:true});
+  updateSubnavFades();
+  let resizeTicking=false;
+  window.addEventListener('resize',()=>{
+    if(resizeTicking)return;resizeTicking=true;
+    requestAnimationFrame(()=>{resizeTicking=false;updateSubnavFades();});
+  },{passive:true});
+}
+// Toggles .has-overflow on every subnav pill row whose content actually overflows its own
+// width — drives the trailing-edge fade in CSS. Needs re-running after anything that could
+// change a row's content or the viewport width: called once here, on window resize, and again
+// at the end of renderPlayerDetail() since that subnav's pill count varies per player (some
+// sections are conditional on the player having that kind of data at all).
+function updateSubnavFades(){
+  document.querySelectorAll('.subnav').forEach(nav=>{
+    nav.classList.toggle('has-overflow', nav.scrollWidth > nav.clientWidth+2);
+  });
 }
 function updateSubnavSpy(){
   const view=document.querySelector('.view.active');
@@ -5810,6 +6064,16 @@ async function load(){
 }
 
 initSubnavs();
+// Collapse toggle for the news/impact-feed cards (Recent Impact, Commander News, Player News)
+// — event delegation on document rather than per-render binding, so it works regardless of how
+// many times a card's own markup gets replaced via innerHTML (Commander/Player News rebuild on
+// every navigation; Recent Impact's card is static but this is one listener either way).
+document.addEventListener('click', e=>{
+  const btn=e.target.closest('.news-card-toggle');
+  if(!btn) return;
+  const card=btn.closest('.news-card');
+  if(card) card.classList.toggle('is-collapsed');
+});
 load();
 
 </script>
