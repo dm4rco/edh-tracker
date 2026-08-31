@@ -2451,6 +2451,28 @@ function computeGameStory(windowGames){
   });
   return events;
 }
+// Chronological "before" comparator (date then order) — same convention as
+// computeStreaksForGames()/impactPool()/etc.
+function isChronologicallyBefore(x, g){
+  const dx=x.date||'', dg=g.date||'';
+  if(dx!==dg) return dx<dg;
+  return (x.order||0)<(g.order||0);
+}
+// Did `player` ever win/lose with `commander` before game `g`, across the ENTIRE history
+// (ALL_GAMES) regardless of the active time-scope filter? Used to upgrade a scope-limited
+// "first win"/"first loss" claim (impact_ev_commander_first_win_year/_period etc.) to the
+// stronger, still-true "-ever" wording when the evidence actually supports it — on user
+// feedback that a win correctly reported as "first 2026 win" was ALSO, as it happened, that
+// player's first-ever win with the commander, and the bigger claim should win when both are
+// true. Only worth calling when scopeKind isn't already 'ever' (that case is already using the
+// strongest wording); cheap enough to call unconditionally otherwise (~1k comparisons, and only
+// runs at all when a first-win/first-loss event is about to fire, not on every game).
+function everWonBefore(player, commander, g){
+  return ALL_GAMES.some(x=>x!==g && isChronologicallyBefore(x,g) && x.seats.some(s=>s.player===player && s.commander===commander && s.rank===1));
+}
+function everLostBefore(player, commander, g){
+  return ALL_GAMES.some(x=>x!==g && isChronologicallyBefore(x,g) && x.seats.some(s=>s.player===player && s.commander===commander && s.rank!==1));
+}
 function computeRecentImpact(n){
   const sorted=impactPool(); // newest-first, within the active time scope
   if(!sorted.length) return null;
@@ -2569,11 +2591,13 @@ function computeRecentImpact(n){
         events.push({type:'commander', tagKey:'impact_tag_commander', weight:1, date:g.date, dayIndex:di&&di.index, dayTotal:di&&di.total,
           html:t('impact_ev_commander',{name:`<b>${esc(s.player)}</b>`,commander:esc(s.commander),outcome})});
       } else if(winsBefore===0 && s.rank===1){
-        const key=scopeKind==='ever'?'impact_ev_commander_first_win':scopeKind==='year'?'impact_ev_commander_first_win_year':'impact_ev_commander_first_win_period';
+        const eff=(scopeKind!=='ever' && !everWonBefore(s.player,s.commander,g))?'ever':scopeKind;
+        const key=eff==='ever'?'impact_ev_commander_first_win':eff==='year'?'impact_ev_commander_first_win_year':'impact_ev_commander_first_win_period';
         events.push({type:'commander-first-win', tagKey:'impact_tag_first_win', weight:2, date:g.date, dayIndex:di&&di.index, dayTotal:di&&di.total,
           html:t(key,{name:`<b>${esc(s.player)}</b>`,commander:esc(s.commander),year:curYear})});
       } else if(winsBefore===gamesBefore && s.rank!==1){
-        const key=scopeKind==='ever'?'impact_ev_commander_first_loss':scopeKind==='year'?'impact_ev_commander_first_loss_year':'impact_ev_commander_first_loss_period';
+        const eff=(scopeKind!=='ever' && !everLostBefore(s.player,s.commander,g))?'ever':scopeKind;
+        const key=eff==='ever'?'impact_ev_commander_first_loss':eff==='year'?'impact_ev_commander_first_loss_year':'impact_ev_commander_first_loss_period';
         events.push({type:'commander-first-loss', tagKey:'impact_tag_first_loss', weight:2, date:g.date, dayIndex:di&&di.index, dayTotal:di&&di.total,
           html:t(key,{name:`<b>${esc(s.player)}</b>`,commander:esc(s.commander),n:gamesBefore,year:curYear})});
       }
@@ -3137,12 +3161,14 @@ function computeCommanderNews(cmdName){
         html:t(debutKey,{name:`<b>${esc(me.player)}</b>`,outcome,year:curYear})});
       coveredGames.add(g);
     } else if(winsBefore===0 && me.rank===1){
-      const key=scopeKind==='ever'?'impact_ev_commander_first_win':scopeKind==='year'?'impact_ev_commander_first_win_year':'impact_ev_commander_first_win_period';
+      const eff=(scopeKind!=='ever' && !everWonBefore(me.player,cmdName,g))?'ever':scopeKind;
+      const key=eff==='ever'?'impact_ev_commander_first_win':eff==='year'?'impact_ev_commander_first_win_year':'impact_ev_commander_first_win_period';
       events.push({type:'commander-first-win', tagKey:'impact_tag_first_win', weight:2, date:g.date,
         html:t(key,{name:`<b>${esc(me.player)}</b>`,commander:esc(cmdName),year:curYear})});
       coveredGames.add(g);
     } else if(winsBefore===gamesBefore && me.rank!==1){
-      const key=scopeKind==='ever'?'impact_ev_commander_first_loss':scopeKind==='year'?'impact_ev_commander_first_loss_year':'impact_ev_commander_first_loss_period';
+      const eff=(scopeKind!=='ever' && !everLostBefore(me.player,cmdName,g))?'ever':scopeKind;
+      const key=eff==='ever'?'impact_ev_commander_first_loss':eff==='year'?'impact_ev_commander_first_loss_year':'impact_ev_commander_first_loss_period';
       events.push({type:'commander-first-loss', tagKey:'impact_tag_first_loss', weight:2, date:g.date,
         html:t(key,{name:`<b>${esc(me.player)}</b>`,commander:esc(cmdName),n:gamesBefore,year:curYear})});
       coveredGames.add(g);
@@ -3690,12 +3716,14 @@ function computePlayerNews(playerName){
         html:t('impact_ev_commander',{name:`<b>${esc(playerName)}</b>`,commander:esc(me.commander),outcome})});
       coveredGames.add(g);
     } else if(winsBefore===0 && me.rank===1){
-      const key=scopeKind==='ever'?'impact_ev_commander_first_win':scopeKind==='year'?'impact_ev_commander_first_win_year':'impact_ev_commander_first_win_period';
+      const eff=(scopeKind!=='ever' && !everWonBefore(playerName,me.commander,g))?'ever':scopeKind;
+      const key=eff==='ever'?'impact_ev_commander_first_win':eff==='year'?'impact_ev_commander_first_win_year':'impact_ev_commander_first_win_period';
       events.push({type:'commander-first-win', tagKey:'impact_tag_first_win', weight:2, date:g.date,
         html:t(key,{name:`<b>${esc(playerName)}</b>`,commander:esc(me.commander),year:curYear})});
       coveredGames.add(g);
     } else if(winsBefore===gamesBefore && me.rank!==1){
-      const key=scopeKind==='ever'?'impact_ev_commander_first_loss':scopeKind==='year'?'impact_ev_commander_first_loss_year':'impact_ev_commander_first_loss_period';
+      const eff=(scopeKind!=='ever' && !everLostBefore(playerName,me.commander,g))?'ever':scopeKind;
+      const key=eff==='ever'?'impact_ev_commander_first_loss':eff==='year'?'impact_ev_commander_first_loss_year':'impact_ev_commander_first_loss_period';
       events.push({type:'commander-first-loss', tagKey:'impact_tag_first_loss', weight:2, date:g.date,
         html:t(key,{name:`<b>${esc(playerName)}</b>`,commander:esc(me.commander),n:gamesBefore,year:curYear})});
       coveredGames.add(g);
