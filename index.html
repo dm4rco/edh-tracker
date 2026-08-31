@@ -728,6 +728,8 @@ tbody tr:hover{background:rgba(217,178,90,.06)}
 .impact-event-date{flex-shrink:0;margin-left:auto;font-size:11.5px;color:var(--ink3);white-space:nowrap}
 .ev-link{cursor:pointer;transition:.15s;border-radius:3px}
 .ev-link:hover{color:var(--gold2);text-decoration:underline}
+.impact-event[data-open-matchup-a]{cursor:pointer;transition:.15s}
+.impact-event[data-open-matchup-a]:hover{background:var(--panel2);border-left-color:var(--gold2)}
 .impact-event.rank{border-left-color:var(--gold)}
 .impact-event.streak-up{border-left-color:var(--win)}
 .impact-event.streak-down{border-left-color:var(--lose)}
@@ -1660,13 +1662,6 @@ const esc=s=>String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').rep
 function nameLink(name, kind){
   const attr = kind==='commander' ? `data-open-commander="${esc(name)}"` : `data-open-player="${esc(name)}"`;
   return `<b class="ev-link" ${attr}>${esc(name)}</b>`;
-}
-// A bolded name that opens the Matchup Detail (Head to Head) page for a specific player PAIR,
-// with both pre-selected — used instead of nameLink() when a matchup event is genuinely
-// player-vs-player, matching how a Rivalries row already behaves (click → the pair's shared
-// page, not either player's own solo profile).
-function matchupLink(name, otherName){
-  return `<b class="ev-link" data-open-matchup-a="${esc(name)}" data-open-matchup-b="${esc(otherName)}">${esc(name)}</b>`;
 }
 const wrColor=wr=>wr>=33?'var(--win)':wr>=20?'var(--mid)':'var(--lose)';
 function hexToRgb(h){h=h.replace('#','');return[parseInt(h.slice(0,2),16),parseInt(h.slice(2,4),16),parseInt(h.slice(4,6),16)];}
@@ -2729,7 +2724,7 @@ function renderRecentImpact(){
     return;
   }
   const defaultTagKey={rank:'impact_tag_rank', rivalry:'impact_tag_rivalry', commander:'impact_tag_commander'};
-  list.innerHTML=d.events.map(e=>`<div class="impact-event ${e.type}">
+  list.innerHTML=d.events.map(e=>`<div class="impact-event ${e.type}"${e.matchupA?` data-open-matchup-a="${esc(e.matchupA)}" data-open-matchup-b="${esc(e.matchupB)}"`:''}>
       <span class="impact-event-tag">${t(e.tagKey||defaultTagKey[e.type])}</span>
       <span class="impact-event-text">${e.html}</span>
       ${e.date?`<span class="impact-event-date">${eventDateLabel(e)}</span>`:''}
@@ -3095,21 +3090,24 @@ function matchupTrend(mineLabel, mineKind, mineOf, sorted, beforeGames, windowGa
       const bs=statusOf(before), as=statusOf(after);
       if(bs==null||as==null||bs===as) return;
       const di=dayIndexInfo(g);
-      const stamp={type:'matchup', tagKey:'impact_tag_matchup', date:g.date, dayIndex:di&&di.index, dayTotal:di&&di.total, game:g};
-      // Player-vs-player matchups link to the Matchup Detail (Head to Head) page for that
-      // exact pair, matching how a Rivalries row already behaves — clicking either name should
-      // land on their shared page, not either player's own solo profile. Commander-involved
-      // matchups (commander-vs-commander, commander-vs-player) have no such shared page, so
-      // those still link each name to its own detail page via nameLink().
+      // Names always link to their own solo profile via nameLink() — on user feedback that
+      // routing names to the shared Matchup Detail page was misleading (a name reads as "go to
+      // THIS player", not "go to this pair"). Instead, for player-vs-player matchups, the whole
+      // row carries matchupA/matchupB so a delegated click handler makes the ROW itself open the
+      // pair's Head to Head page (see the .impact-event[data-open-matchup-a] handler), while the
+      // name inside it still independently opens the solo profile. Commander-involved matchups
+      // (commander-vs-commander, commander-vs-player) get neither — there's no shared page for
+      // those pairings, so the row stays inert and only the names are clickable.
       const bothPlayers = mineKind==='player' && otherKind==='player';
-      const linkFor=(name,kind,otherName)=> bothPlayers ? matchupLink(name,otherName) : nameLink(name,kind);
+      const stamp={type:'matchup', tagKey:'impact_tag_matchup', date:g.date, dayIndex:di&&di.index, dayTotal:di&&di.total, game:g,
+        matchupA: bothPlayers?mineLabel:undefined, matchupB: bothPlayers?label:undefined};
       if(as==='tie'){
-        events.push({...stamp, weight:5, html:t('impact_ev_rivalry_tie',{a:linkFor(mineLabel,mineKind,label),b:linkFor(label,otherKind,mineLabel),rec:`${after.mine}-${after.other}`})});
+        events.push({...stamp, weight:5, html:t('impact_ev_rivalry_tie',{a:nameLink(mineLabel,mineKind),b:nameLink(label,otherKind),rec:`${after.mine}-${after.other}`})});
       } else {
         const leader=as==='a'?mineLabel:label, leaderKind=as==='a'?mineKind:otherKind;
         const other=as==='a'?label:mineLabel, otherKindResolved=as==='a'?otherKind:mineKind;
         const ls=as==='a'?after.mine:after.other, os=as==='a'?after.other:after.mine;
-        events.push({...stamp, weight:6, html:t('impact_ev_rivalry_flip',{leader:linkFor(leader,leaderKind,other),other:linkFor(other,otherKindResolved,leader),rec:`${ls}-${os}`})});
+        events.push({...stamp, weight:6, html:t('impact_ev_rivalry_flip',{leader:nameLink(leader,leaderKind),other:nameLink(other,otherKindResolved),rec:`${ls}-${os}`})});
       }
     });
   });
@@ -3439,7 +3437,7 @@ function renderCommanderDetail(){
       : `<span class="rg-focus-main">${focusTxt}</span>`;
     const defaultTagKey={commander:'impact_tag_commander'};
     const eventsHtml = news.events.length
-      ? news.events.map(e=>`<div class="impact-event ${e.type}">
+      ? news.events.map(e=>`<div class="impact-event ${e.type}"${e.matchupA?` data-open-matchup-a="${esc(e.matchupA)}" data-open-matchup-b="${esc(e.matchupB)}"`:''}>
           <span class="impact-event-tag">${t(e.tagKey||defaultTagKey[e.type])}</span>
           <span class="impact-event-text">${e.html}</span>
           ${e.date?`<span class="impact-event-date">${localizedGameDate(e.date)}</span>`:''}
@@ -4161,7 +4159,7 @@ function renderPlayerDetail(){
       ? `<span class="rg-focus-main">${focusTxt}</span><span class="rg-focus-dates">${localizedGameDate(news.from)} – ${localizedGameDate(news.to)}</span>`
       : `<span class="rg-focus-main">${focusTxt}</span>`;
     const eventsHtml = news.events.length
-      ? news.events.map(e=>`<div class="impact-event ${e.type}">
+      ? news.events.map(e=>`<div class="impact-event ${e.type}"${e.matchupA?` data-open-matchup-a="${esc(e.matchupA)}" data-open-matchup-b="${esc(e.matchupB)}"`:''}>
           <span class="impact-event-tag">${t(e.tagKey)}</span>
           <span class="impact-event-text">${e.html}</span>
           ${e.date?`<span class="impact-event-date">${localizedGameDate(e.date)}</span>`:''}
@@ -6131,13 +6129,23 @@ document.addEventListener('click', e=>{
 // Bolded names inside news-feed event text (built by nameLink()) — same delegation reasoning
 // as the collapse toggle above: these strings are embedded in innerHTML long before any DOM
 // node exists to bind a listener to, so one document-level listener handles every one of them
-// regardless of which feed or how many times it re-renders.
+// regardless of which feed or how many times it re-renders. Always opens the SOLO profile page,
+// even for a player-vs-player matchup row (see the row-level handler below for the pair page).
 document.addEventListener('click', e=>{
   const el=e.target.closest('.ev-link');
   if(!el) return;
-  if(el.dataset.openMatchupA) openMatchupDetail(el.dataset.openMatchupA, el.dataset.openMatchupB);
-  else if(el.dataset.openPlayer) openPlayerDetail(el.dataset.openPlayer);
+  if(el.dataset.openPlayer) openPlayerDetail(el.dataset.openPlayer);
   else if(el.dataset.openCommander) openCommanderDetail(el.dataset.openCommander);
+});
+// Whole-row navigation for player-vs-player matchup events (data-open-matchup-a/b, set by
+// matchupTrend() only when both sides of the rivalry are players): the row itself opens the
+// pair's Head to Head page. Skipped when the click landed on a .ev-link (a name) so that
+// still independently opens the solo profile instead of double-navigating.
+document.addEventListener('click', e=>{
+  if(e.target.closest('.ev-link')) return;
+  const row=e.target.closest('.impact-event[data-open-matchup-a]');
+  if(!row) return;
+  openMatchupDetail(row.dataset.openMatchupA, row.dataset.openMatchupB);
 });
 load();
 
