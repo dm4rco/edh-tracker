@@ -1661,6 +1661,13 @@ function nameLink(name, kind){
   const attr = kind==='commander' ? `data-open-commander="${esc(name)}"` : `data-open-player="${esc(name)}"`;
   return `<b class="ev-link" ${attr}>${esc(name)}</b>`;
 }
+// A bolded name that opens the Matchup Detail (Head to Head) page for a specific player PAIR,
+// with both pre-selected — used instead of nameLink() when a matchup event is genuinely
+// player-vs-player, matching how a Rivalries row already behaves (click → the pair's shared
+// page, not either player's own solo profile).
+function matchupLink(name, otherName){
+  return `<b class="ev-link" data-open-matchup-a="${esc(name)}" data-open-matchup-b="${esc(otherName)}">${esc(name)}</b>`;
+}
 const wrColor=wr=>wr>=33?'var(--win)':wr>=20?'var(--mid)':'var(--lose)';
 function hexToRgb(h){h=h.replace('#','');return[parseInt(h.slice(0,2),16),parseInt(h.slice(2,4),16),parseInt(h.slice(4,6),16)];}
 function mix(c1,c2,t){const a=hexToRgb(c1),b=hexToRgb(c2);return`rgb(${a.map((v,i)=>Math.round(v+(b[i]-v)*t)).join(',')})`;}
@@ -3089,13 +3096,20 @@ function matchupTrend(mineLabel, mineKind, mineOf, sorted, beforeGames, windowGa
       if(bs==null||as==null||bs===as) return;
       const di=dayIndexInfo(g);
       const stamp={type:'matchup', tagKey:'impact_tag_matchup', date:g.date, dayIndex:di&&di.index, dayTotal:di&&di.total, game:g};
+      // Player-vs-player matchups link to the Matchup Detail (Head to Head) page for that
+      // exact pair, matching how a Rivalries row already behaves — clicking either name should
+      // land on their shared page, not either player's own solo profile. Commander-involved
+      // matchups (commander-vs-commander, commander-vs-player) have no such shared page, so
+      // those still link each name to its own detail page via nameLink().
+      const bothPlayers = mineKind==='player' && otherKind==='player';
+      const linkFor=(name,kind,otherName)=> bothPlayers ? matchupLink(name,otherName) : nameLink(name,kind);
       if(as==='tie'){
-        events.push({...stamp, weight:5, html:t('impact_ev_rivalry_tie',{a:nameLink(mineLabel,mineKind),b:nameLink(label,otherKind),rec:`${after.mine}-${after.other}`})});
+        events.push({...stamp, weight:5, html:t('impact_ev_rivalry_tie',{a:linkFor(mineLabel,mineKind,label),b:linkFor(label,otherKind,mineLabel),rec:`${after.mine}-${after.other}`})});
       } else {
         const leader=as==='a'?mineLabel:label, leaderKind=as==='a'?mineKind:otherKind;
         const other=as==='a'?label:mineLabel, otherKindResolved=as==='a'?otherKind:mineKind;
         const ls=as==='a'?after.mine:after.other, os=as==='a'?after.other:after.mine;
-        events.push({...stamp, weight:6, html:t('impact_ev_rivalry_flip',{leader:nameLink(leader,leaderKind),other:nameLink(other,otherKindResolved),rec:`${ls}-${os}`})});
+        events.push({...stamp, weight:6, html:t('impact_ev_rivalry_flip',{leader:linkFor(leader,leaderKind,other),other:linkFor(other,otherKindResolved,leader),rec:`${ls}-${os}`})});
       }
     });
   });
@@ -6121,7 +6135,8 @@ document.addEventListener('click', e=>{
 document.addEventListener('click', e=>{
   const el=e.target.closest('.ev-link');
   if(!el) return;
-  if(el.dataset.openPlayer) openPlayerDetail(el.dataset.openPlayer);
+  if(el.dataset.openMatchupA) openMatchupDetail(el.dataset.openMatchupA, el.dataset.openMatchupB);
+  else if(el.dataset.openPlayer) openPlayerDetail(el.dataset.openPlayer);
   else if(el.dataset.openCommander) openCommanderDetail(el.dataset.openCommander);
 });
 load();
