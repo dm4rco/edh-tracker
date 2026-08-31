@@ -726,6 +726,8 @@ tbody tr:hover{background:rgba(217,178,90,.06)}
 .impact-event b{color:var(--ink)}
 .impact-event-tag{flex-shrink:0;font-family:'JetBrains Mono';font-size:9.5px;text-transform:uppercase;letter-spacing:.06em;color:var(--ink3);background:var(--panel2);padding:4px 8px;border-radius:5px;white-space:nowrap}
 .impact-event-date{flex-shrink:0;margin-left:auto;font-size:11.5px;color:var(--ink3);white-space:nowrap}
+.ev-link{cursor:pointer;transition:.15s;border-radius:3px}
+.ev-link:hover{color:var(--gold2);text-decoration:underline}
 .impact-event.rank{border-left-color:var(--gold)}
 .impact-event.streak-up{border-left-color:var(--win)}
 .impact-event.streak-down{border-left-color:var(--lose)}
@@ -1651,6 +1653,14 @@ function computeStats(games){
 /* ---------- globals ---------- */
 const $=s=>document.querySelector(s);
 const esc=s=>String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+// A bolded name that's actually clickable — jumps to the Player or Commander detail page.
+// kind is 'player' or 'commander'; the click itself is handled by one delegated listener (see
+// the .ev-link handler near initSubnavs()) rather than per-event binding, since these strings
+// end up embedded in innerHTML built long before any DOM node exists to attach a listener to.
+function nameLink(name, kind){
+  const attr = kind==='commander' ? `data-open-commander="${esc(name)}"` : `data-open-player="${esc(name)}"`;
+  return `<b class="ev-link" ${attr}>${esc(name)}</b>`;
+}
 const wrColor=wr=>wr>=33?'var(--win)':wr>=20?'var(--mid)':'var(--lose)';
 function hexToRgb(h){h=h.replace('#','');return[parseInt(h.slice(0,2),16),parseInt(h.slice(2,4),16),parseInt(h.slice(4,6),16)];}
 function mix(c1,c2,t){const a=hexToRgb(c1),b=hexToRgb(c2);return`rgb(${a.map((v,i)=>Math.round(v+(b[i]-v)*t)).join(',')})`;}
@@ -3050,7 +3060,7 @@ function computeCommanderDetail(cmdName){
 // wrapper kept for its two existing call sites; Player News uses this directly for player-vs-
 // player. Each event carries `game:g` so callers can mark that game "covered" (no separate
 // Game Recap needed for a date that already got a matchup story).
-function matchupTrend(mineLabel, mineOf, sorted, beforeGames, windowGames, otherOf){
+function matchupTrend(mineLabel, mineKind, mineOf, sorted, beforeGames, windowGames, otherKind, otherOf){
   const events=[];
   const recordOf=(games, otherLabel)=>{
     let mine=0, other=0, ties=0;
@@ -3080,17 +3090,19 @@ function matchupTrend(mineLabel, mineOf, sorted, beforeGames, windowGames, other
       const di=dayIndexInfo(g);
       const stamp={type:'matchup', tagKey:'impact_tag_matchup', date:g.date, dayIndex:di&&di.index, dayTotal:di&&di.total, game:g};
       if(as==='tie'){
-        events.push({...stamp, weight:5, html:t('impact_ev_rivalry_tie',{a:`<b>${esc(mineLabel)}</b>`,b:`<b>${esc(label)}</b>`,rec:`${after.mine}-${after.other}`})});
+        events.push({...stamp, weight:5, html:t('impact_ev_rivalry_tie',{a:nameLink(mineLabel,mineKind),b:nameLink(label,otherKind),rec:`${after.mine}-${after.other}`})});
       } else {
-        const leader=as==='a'?mineLabel:label, other=as==='a'?label:mineLabel, ls=as==='a'?after.mine:after.other, os=as==='a'?after.other:after.mine;
-        events.push({...stamp, weight:6, html:t('impact_ev_rivalry_flip',{leader:`<b>${esc(leader)}</b>`,other:`<b>${esc(other)}</b>`,rec:`${ls}-${os}`})});
+        const leader=as==='a'?mineLabel:label, leaderKind=as==='a'?mineKind:otherKind;
+        const other=as==='a'?label:mineLabel, otherKindResolved=as==='a'?otherKind:mineKind;
+        const ls=as==='a'?after.mine:after.other, os=as==='a'?after.other:after.mine;
+        events.push({...stamp, weight:6, html:t('impact_ev_rivalry_flip',{leader:nameLink(leader,leaderKind),other:nameLink(other,otherKindResolved),rec:`${ls}-${os}`})});
       }
     });
   });
   return events;
 }
-function commanderMatchupTrend(cmdName, sorted, beforeGames, windowGames, otherOf){
-  return matchupTrend(cmdName, s=>s.commander, sorted, beforeGames, windowGames, otherOf);
+function commanderMatchupTrend(cmdName, sorted, beforeGames, windowGames, otherKind, otherOf){
+  return matchupTrend(cmdName, 'commander', s=>s.commander, sorted, beforeGames, windowGames, otherKind, otherOf);
 }
 function computeCommanderNews(cmdName){
   const sorted=gamesForYear().filter(g=>g.seats.some(s=>s.commander===cmdName)).slice().sort((a,b)=>{
@@ -3211,8 +3223,8 @@ function computeCommanderNews(cmdName){
   // PLAYERS — both via the shared commanderMatchupTrend() detector above. "Everything we have
   // about this commander" per direct request: deck matchups were previously only shown as
   // static best/worst callouts elsewhere on this page, never as a "just changed" moment.
-  [...commanderMatchupTrend(cmdName, sorted, beforeGames, windowGames, s=>s.commander),
-   ...commanderMatchupTrend(cmdName, sorted, beforeGames, windowGames, s=>s.player)].forEach(e=>{
+  [...commanderMatchupTrend(cmdName, sorted, beforeGames, windowGames, 'commander', s=>s.commander),
+   ...commanderMatchupTrend(cmdName, sorted, beforeGames, windowGames, 'player', s=>s.player)].forEach(e=>{
     events.push(e);
     if(e.game) coveredGames.add(e.game);
   });
@@ -3742,7 +3754,7 @@ function computePlayerNews(playerName){
 
   // 4) this player vs each opposing PLAYER — head-to-head lead changes/ties, via the shared
   // matchupTrend() detector (see above).
-  matchupTrend(playerName, s=>s.player, sorted, beforeGames, windowGames, s=>s.player).forEach(e=>{
+  matchupTrend(playerName, 'player', s=>s.player, sorted, beforeGames, windowGames, 'player', s=>s.player).forEach(e=>{
     events.push(e);
     coveredGames.add(e.game);
   });
@@ -6101,6 +6113,16 @@ document.addEventListener('click', e=>{
   if(!btn) return;
   const card=btn.closest('.news-card');
   if(card) card.classList.toggle('is-collapsed');
+});
+// Bolded names inside news-feed event text (built by nameLink()) — same delegation reasoning
+// as the collapse toggle above: these strings are embedded in innerHTML long before any DOM
+// node exists to bind a listener to, so one document-level listener handles every one of them
+// regardless of which feed or how many times it re-renders.
+document.addEventListener('click', e=>{
+  const el=e.target.closest('.ev-link');
+  if(!el) return;
+  if(el.dataset.openPlayer) openPlayerDetail(el.dataset.openPlayer);
+  else if(el.dataset.openCommander) openCommanderDetail(el.dataset.openCommander);
 });
 load();
 
